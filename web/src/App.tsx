@@ -1,4 +1,4 @@
-import { agentColors } from "./theme";
+import { agentColors, agentColor } from "./theme";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Activity,
@@ -216,7 +216,7 @@ function Portrait({ agent, small = false }: { agent: Agent; small?: boolean }) {
     <div
       className={`portrait ${small ? "small" : ""}`}
       style={
-        { "--agent": agent.color || colors[agent.id] } as React.CSSProperties
+        { "--agent": agentColor(agent.id, agent.color) } as React.CSSProperties
       }
     >
       <span className="portrait-antenna" />
@@ -308,7 +308,7 @@ export default function App() {
   const enabled = status === "connected" && !!state;
   const agent =
     state?.agents.find((a) => a.id === selected) ?? state?.agents[0];
-  const color = agent?.color || colors[agent?.id ?? "persona"] || "#B7D7C0";
+  const color = agentColor(agent?.id ?? "persona", agent?.color);
   const configure = (value: Omit<Control, "action">) =>
     void control({ action: "configure", ...value });
   useEffect(() => {

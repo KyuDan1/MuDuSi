@@ -7,7 +7,7 @@
     <meta name="description" content="MuDuSi is a virtual testbed for speech agents: visualize multi-agent conversations, vary acoustic scenes, and collect interaction trajectories before setting up physical hardware.">
     <title>MuDuSi · Multi-agent Duplex Simulator</title>
     <link rel="canonical" href="https://kyudan1.github.io/MuDuSi/">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=pastel-20261012">
     <script src="script.js" defer></script>
   </head>
   <body id="top">
@@ -49,17 +49,17 @@
           <p class="section-intro">Each agent generates its own speech. The simulator carries that sound through the room into the other agents’ microphones, letting conversations unfold without assigned speaking turns.</p>
           <figure class="conversation">
             <div class="figure-heading"><h3>Two friends</h3><span>PersonaPlex + Moshi</span></div>
-            <video controls playsinline preload="none" poster="assets/two-friends.jpg" aria-label="Two friends: a conversation between PersonaPlex and Moshi"><source src="assets/two-friends.mp4" type="video/mp4">Your browser does not support embedded video. <a href="assets/two-friends.mp4">Download the conversation.</a></video>
+            <video controls playsinline preload="none" poster="assets/two-friends.jpg?v=pastel-20261012" aria-label="Two friends: a conversation between PersonaPlex and Moshi"><source src="assets/two-friends.mp4?v=pastel-20261012" type="video/mp4">Your browser does not support embedded video. <a href="assets/two-friends.mp4?v=pastel-20261012">Download the conversation.</a></video>
             <figcaption><span class="figure-number">Figure 1.</span> Two speech agents share a casual conversation. Their independently generated voices pass through the same acoustic simulation.</figcaption>
           </figure>
           <figure class="conversation">
             <div class="figure-heading"><h3>At the coffee shop</h3><span>Two PersonaPlex agents</span></div>
-            <video controls playsinline preload="none" poster="assets/clerk-customer.jpg" aria-label="Coffee shop conversation between a PersonaPlex clerk and customer"><source src="assets/clerk-customer.mp4" type="video/mp4">Your browser does not support embedded video. <a href="assets/clerk-customer.mp4">Download the conversation.</a></video>
+            <video controls playsinline preload="none" poster="assets/clerk-customer.jpg?v=pastel-20261012" aria-label="Coffee shop conversation between a PersonaPlex clerk and customer"><source src="assets/clerk-customer.mp4?v=pastel-20261012" type="video/mp4">Your browser does not support embedded video. <a href="assets/clerk-customer.mp4?v=pastel-20261012">Download the conversation.</a></video>
             <figcaption><span class="figure-number">Figure 2.</span> Mia, the clerk, and Ben, the customer, discuss an iced oat latte and a croissant. The agents receive role and menu prompts; their dialogue is generated, not scripted.</figcaption>
           </figure>
           <figure class="conversation">
             <div class="figure-heading"><h3>A three-way conversation</h3><span>Two PersonaPlex agents + Moshi</span></div>
-            <video controls playsinline preload="none" poster="assets/three-agents.jpg" aria-label="Three-way conversation between two PersonaPlex agents and Moshi"><source src="assets/three-agents.mp4" type="video/mp4">Your browser does not support embedded video. <a href="assets/three-agents.mp4">Download the conversation.</a></video>
+            <video controls playsinline preload="none" poster="assets/three-agents.jpg?v=pastel-20261012" aria-label="Three-way conversation between two PersonaPlex agents and Moshi"><source src="assets/three-agents.mp4?v=pastel-20261012" type="video/mp4">Your browser does not support embedded video. <a href="assets/three-agents.mp4?v=pastel-20261012">Download the conversation.</a></video>
             <figcaption><span class="figure-number">Figure 3.</span> Three independent agents listen and speak in one room, including overlapping speech. The participants use two model families, with distinct voices for the two PersonaPlex instances.</figcaption>
           </figure>
           <p class="provenance">These are selected excerpts from actual model runs. Video audio mixes the agents’ emissions; speech bubbles replay offline ASR at word timestamps. Each agent’s spatially mixed receiver audio is saved separately. The clips illustrate interaction, not a conversation-quality benchmark.</p>

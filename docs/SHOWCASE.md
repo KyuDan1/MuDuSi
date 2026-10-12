@@ -242,3 +242,11 @@ The selected recordings are private runtime artifacts and are not bundled with t
 repository. Use your own completed recordings or the published project-page clips.
 The introduction retains the order title → friends → clerk/customer → three agents,
 with silent transition padding so the crossfades do not overlap adjacent speech.
+
+
+The October 12, 2026 pastel exports used CPU rendering jobs 189971–189973 and
+packaging job 189978. All three clips and the 1,814-frame introduction passed
+full audio/video decoding. Each re-rendered clip had the same decoded audio
+sample count as its earlier English export, with zero-offset waveform correlation
+1.0. In the chaptered film, segment correlations exceeded 0.99997 at the expected
+start times. The changes affect presentation, not the model dialogue.

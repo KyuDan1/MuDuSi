@@ -1,4 +1,4 @@
-import theme, { agentColors } from "./theme";
+import theme, { agentColor } from "./theme";
 import { Component, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -12,9 +12,7 @@ import {
 import * as THREE from "three";
 import type { Agent, Snapshot } from "./types";
 
-const colorOf = (agent: Agent) =>
-  agent.color ||
-  (agentColors[agent.id] ?? theme.sage);
+const colorOf = (agent: Agent) => agentColor(agent.id, agent.color);
 
 function SoundWave({
   color,

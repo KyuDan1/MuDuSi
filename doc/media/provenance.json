@@ -6,8 +6,10 @@
     "selected_seconds": 26.92,
     "decoded_frames": 646,
     "fps": 24,
-    "bytes": 1504317,
-    "sha256": "661d3e9ceb7503164b6a8238f1e40798257bf9449b395e342cad26a901330218",
+    "bytes": 1502008,
+    "sha256": "8de70852d9ffadef384fa126b5ad2d12d7e67c1765087f958a7327519aab40eb",
+    "visual_theme": "MuDuSi Pastel (configs/visual-theme.json)",
+    "render_job": "189971",
     "audio": "Actual model emissions; loudness mastered, AAC encoded",
     "captions": "Offline Whisper-small ASR with word-timed display"
   },
@@ -18,8 +20,10 @@
     "selected_seconds": 20.75,
     "decoded_frames": 498,
     "fps": 24,
-    "bytes": 1168664,
-    "sha256": "0e52c7ea9722db88de69ff59f7f5be434309707bc07d46f826bae13ddf1ebad2",
+    "bytes": 1176869,
+    "sha256": "d3b15babc8a9fdf15318ece47b5ca4bf0ecf209e19f7dc88088b88a2e0e8b434",
+    "visual_theme": "MuDuSi Pastel (configs/visual-theme.json)",
+    "render_job": "189972",
     "audio": "Actual model emissions; loudness mastered, AAC encoded",
     "captions": "Offline Whisper-small ASR with word-timed display"
   },
@@ -30,8 +34,10 @@
     "selected_seconds": 14.92,
     "decoded_frames": 358,
     "fps": 24,
-    "bytes": 1075921,
-    "sha256": "beb48b3f1f982a98b6c222af8a0c2fb4b93290156b51e3fcf48a233adcb6f95a",
+    "bytes": 1070201,
+    "sha256": "4c9650a3c55c57a410fcecf918ea8668094583e0dfecf663975bd8f1f773f976",
+    "visual_theme": "MuDuSi Pastel (configs/visual-theme.json)",
+    "render_job": "189973",
     "audio": "Actual model emissions; loudness mastered, AAC encoded",
     "captions": "Offline Whisper-small ASR with word-timed display"
   }

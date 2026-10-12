@@ -18,9 +18,9 @@ AGENT_IDS = ("persona", "moshi", "custom")
 SCENARIOS = ("roundtable", "interruption", "cocktail", "quiet")
 ROOM = {"width": 12.0, "depth": 9.0, "height": 3.2}
 AGENT_DEFAULTS = (
-    {"id": "persona", "name": "PersonaPlex", "model": "PersonaPlex · demo adapter", "color": "#9ef07e", "position": [-3.0, 1.2, -1.2]},
-    {"id": "moshi", "name": "Moshi", "model": "Moshi · demo adapter", "color": "#a99aff", "position": [2.7, 1.2, -1.1]},
-    {"id": "custom", "name": "Custom SLM", "model": "Custom SLM · demo adapter", "color": "#ffc878", "position": [0.0, 1.2, 2.3]},
+    {"id": "persona", "name": "PersonaPlex", "model": "PersonaPlex · demo adapter", "color": "#B7D7C0", "position": [-3.0, 1.2, -1.2]},
+    {"id": "moshi", "name": "Moshi", "model": "Moshi · demo adapter", "color": "#C9C0E8", "position": [2.7, 1.2, -1.1]},
+    {"id": "custom", "name": "Custom SLM", "model": "Custom SLM · demo adapter", "color": "#E8C6AA", "position": [0.0, 1.2, 2.3]},
 )
 
 # start, duration, speaker, display-only script; each scenario repeats after 18s.

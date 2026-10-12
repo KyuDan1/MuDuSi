@@ -40,3 +40,13 @@ The reported status must remain **indexing not confirmed** until the report appe
 Keep the author order, title, date, version, and report number consistent across the PDF, HTML metadata, CFF, BibTeX, and README. Retain published versions when substantive report revisions occur, and avoid silently changing author or publication metadata. If a permanent URL changes, preserve a redirect to the report rather than sending readers to an unrelated homepage.
 
 Before publishing a metadata change, validate `CITATION.cff` against the [official CFF 1.2.0 schema](https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json). Recheck the deployed HTML and searchable PDF independently; schema validation does not test hosting or indexing.
+
+
+## Publication check — October 12, 2026
+
+The canonical HTML page and PDF returned HTTP 200 without authentication. The
+public PDF exactly matched the local report (six searchable pages, 165,366 bytes),
+and the personal homepage links directly to the report page. The HTML lists
+Kyudan Jung and Jaegul Choo in the same order as the PDF and citation files.
+There is no `robots.txt` exclusion file at the hosting root (HTTP 404).
+**Google Scholar indexing is not confirmed.**

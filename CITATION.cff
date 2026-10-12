@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use MuDuSi in your research, please cite the technical report below."
+type: software
+title: "MuDuSi: Multi-agent Duplex Simulator"
+authors:
+  - family-names: Jung
+    given-names: Kyudan
+    affiliation: KAIST AI
+  - family-names: Choo
+    given-names: Jaegul
+    affiliation: KAIST AI
+version: 0.1.0
+date-released: "2026-10-12"
+license: MIT
+repository-code: "https://github.com/KyuDan1/MuDuSi"
+url: "https://kyudan1.github.io/MuDuSi/"
+preferred-citation:
+  type: report
+  title: "MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models"
+  authors:
+    - family-names: Jung
+      given-names: Kyudan
+      affiliation: KAIST AI
+    - family-names: Choo
+      given-names: Jaegul
+      affiliation: KAIST AI
+  institution:
+    name: MuDuSi Project
+  number: MUDUSI-TR-2026-01
+  version: "1.0"
+  date-released: "2026-10-12"
+  year: 2026
+  month: 10
+  url: "https://kyudan1.github.io/MuDuSi/paper/"

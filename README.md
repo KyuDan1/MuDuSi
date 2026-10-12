@@ -1,23 +1,21 @@
 <div align="center">
 
-# MuDuSi
-
-**Multi-agent Duplex Simulator**
+<img src="doc/media/mudusi-banner.svg" alt="MuDuSi — Multi-agent Duplex Simulator. Three agents sharing one acoustic space." width="1000">
 
 Full-duplex speech agents, sharing one acoustic world.
 
-[![Simulator checks](https://github.com/KyuDan1/MuDuSi/actions/workflows/check.yml/badge.svg)](https://github.com/KyuDan1/MuDuSi/actions/workflows/check.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Simulator checks](https://img.shields.io/github/actions/workflow/status/KyuDan1/MuDuSi/check.yml?branch=main&label=simulator%20checks&labelColor=28483D)](https://github.com/KyuDan1/MuDuSi/actions/workflows/check.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-28483D?labelColor=66786F)](LICENSE)
 
 Test speech agents in a virtual acoustic world before arranging microphones, speakers, and physical devices.
 
-[Project page](https://mudusi.chirpy-tulip-0991.chatgpt.site) · [Technical report](doc/mudusi-technical-report.pdf) · [Quick start](#quick-start) · [Simulation modes](#simulation-modes) · [GPU setup](docs/GPU_SERVER.md) · [Contribute](CONTRIBUTING.md)
+[Project page](https://kyudan1.github.io/MuDuSi/) · [Technical report](https://kyudan1.github.io/MuDuSi/paper/) · [Quick start](#quick-start) · [Simulation modes](#simulation-modes) · [GPU setup](docs/GPU_SERVER.md) · [Contribute](CONTRIBUTING.md)
 
 **24 kHz audio · simultaneous listening and speaking · per-agent microphone recordings**
 
 </div>
 
-Watch the two-friend, clerk/customer, and three-agent conversations on the [project page](https://mudusi.chirpy-tulip-0991.chatgpt.site). The examples use actual model-generated speech; captions are offline, word-timed ASR. See [recording provenance and limitations](docs/SHOWCASE.md).
+Watch the two-friend, clerk/customer, and three-agent conversations on the [project page](https://kyudan1.github.io/MuDuSi/). The examples use actual model-generated speech; captions are offline, word-timed ASR. See [recording provenance and limitations](docs/SHOWCASE.md).
 
 ## Why MuDuSi?
 
@@ -199,13 +197,37 @@ python -m workers.echo_worker --port 9001
 mudusi serve --models configs/echo.example.json
 ```
 
+## Citation
+
+If you use MuDuSi in your research, please cite the [technical report](https://kyudan1.github.io/MuDuSi/paper/):
+
+> Kyudan Jung and Jaegul Choo. **MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models.** MuDuSi Project, Technical Report MUDUSI-TR-2026-01, version 1.0, October 12, 2026. Both authors: KAIST AI.
+
+```bibtex
+@techreport{jung2026mudusi,
+  author      = {Jung, Kyudan and Choo, Jaegul},
+  title       = {{MuDuSi}: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models},
+  institution = {MuDuSi Project},
+  type        = {Technical Report},
+  number      = {MUDUSI-TR-2026-01},
+  year        = {2026},
+  month       = oct,
+  note        = {Version 1.0, October 12, 2026},
+  url         = {https://kyudan1.github.io/MuDuSi/paper/}
+}
+```
+
+[Download BibTeX](CITATION.bib) · [Citation metadata](CITATION.cff) · [Publication and Scholar indexing notes](doc/SCHOLAR.md)
+
+The report is self-published; its NeurIPS-style layout does not imply conference acceptance. Citation metadata makes the work citable and does not establish Google Scholar indexing.
+
 ## Contributing
 
 Contributions to model workers, acoustic validation, speech analysis, evaluation tasks, and rollout/trainer interfaces are welcome. The [contribution guide](CONTRIBUTING.md) covers local setup, focused checks, adapter requirements, reproducible evidence, and recording privacy. Please distinguish implemented behavior from proposed integrations in code, examples, and claims.
 
 ## Documentation
 
-[Technical report (PDF)](doc/mudusi-technical-report.pdf) · [LaTeX source](doc/mudusi-technical-report.tex) · [Architecture](docs/ARCHITECTURE.md) · [GPU setup](docs/GPU_SERVER.md) · [Model protocols](docs/MODELS.md) · [ASR](docs/ASR.md) · [Showcase recording](docs/SHOWCASE.md) · [SLM training plan](docs/SLM_TRAINING.md)
+[Technical report (PDF)](https://kyudan1.github.io/MuDuSi/paper/mudusi-technical-report.pdf) · [LaTeX source](doc/mudusi-technical-report.tex) · [Architecture](docs/ARCHITECTURE.md) · [GPU setup](docs/GPU_SERVER.md) · [Model protocols](docs/MODELS.md) · [ASR](docs/ASR.md) · [Showcase recording](docs/SHOWCASE.md) · [SLM training plan](docs/SLM_TRAINING.md)
 
 Simulator code is available under the [MIT license](LICENSE). Model weights and bundled font assets retain their own licenses.
 

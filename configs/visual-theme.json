@@ -1,0 +1,15 @@
+{
+  "name": "MuDuSi Pastel",
+  "sage": "#B7D7C0",
+  "lavender": "#C9C0E8",
+  "apricot": "#E8C6AA",
+  "cream": "#FAF8F2",
+  "forest": "#28483D",
+  "muted": "#66786F",
+  "videoBackground": "#111B18",
+  "agents": {
+    "persona": "#B7D7C0",
+    "moshi": "#C9C0E8",
+    "custom": "#E8C6AA"
+  }
+}

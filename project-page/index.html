@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#143d2d">
     <meta name="description" content="MuDuSi is a virtual testbed for speech agents: visualize multi-agent conversations, vary acoustic scenes, and collect interaction trajectories before setting up physical hardware.">
     <title>MuDuSi · Multi-agent Duplex Simulator</title>
+    <link rel="canonical" href="https://kyudan1.github.io/MuDuSi/">
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
   </head>
@@ -21,7 +22,7 @@
           <h1>MuDuSi<span class="pronunciation">/ moo · doo · see /</span></h1>
           <p class="expansion">Multi-agent Duplex Simulator</p>
           <p class="hero-description">A virtual testbed for speech agents.<br class="desktop-break"> Test listening and speaking before setting up the hardware.</p>
-          <div class="hero-links"><a href="assets/mudusi-technical-report.pdf">Technical report <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi">Code &amp; documentation <span aria-hidden="true">↗</span></a></div>
+          <div class="hero-links"><a href="paper/">Technical report <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi">Code &amp; documentation <span aria-hidden="true">↗</span></a></div>
         </div>
         <div class="hero-bottom"><span>Full-duplex speech · Spatial acoustics · Multi-agent interaction</span><a href="#conversations">Listen to the conversations <span aria-hidden="true">↓</span></a></div>
       </div>
@@ -104,7 +105,12 @@
           <pre><code>mudusi serve \
   --replay runs/conversation --port 18766</code></pre>
           <p>Open <code>http://localhost:18766/?showcase</code> for the presentation view. Word-timed speech bubbles require the optional offline ASR step. On the shared GPU cluster, launch model inference through the supplied Slurm scripts.</p>
-          <div class="reading-links"><a href="https://github.com/KyuDan1/MuDuSi">Installation &amp; examples <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi/blob/main/docs/SHOWCASE.md">Recording &amp; rendering <span aria-hidden="true">↗</span></a><a href="assets/mudusi-technical-report.pdf">Read the technical report <span aria-hidden="true">↗</span></a></div>
+          <div class="reading-links"><a href="https://github.com/KyuDan1/MuDuSi">Installation &amp; examples <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi/blob/main/docs/SHOWCASE.md">Recording &amp; rendering <span aria-hidden="true">↗</span></a><a href="paper/">Read the technical report <span aria-hidden="true">↗</span></a></div>
+        </section>
+        <section id="paper" aria-labelledby="paper-heading">
+          <h2 id="paper-heading">Technical report</h2>
+          <p><a href="paper/">MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models</a><br>Kyudan Jung · Jaegul Choo<br><span class="side-note">KAIST AI · October 12, 2026 · Version 1.0</span></p>
+          <div class="reading-links"><a href="paper/">Abstract &amp; citation</a><a href="paper/mudusi-technical-report.pdf">Full paper (PDF)</a><a href="paper/citation.bib">BibTeX</a></div>
         </section>
         <section class="contribute" aria-labelledby="contribute-heading">
           <h2 id="contribute-heading">Help shape the testbed.</h2>

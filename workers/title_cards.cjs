@@ -1,6 +1,7 @@
 /* Render local, typographic chapter cards without external assets or services. */
 const fs = require("node:fs");
 const path = require("node:path");
+const theme = require("../configs/visual-theme.json");
 const { chromium } = require(
   path.resolve(
     process.env.ARENA_PLAYWRIGHT || "work/browser/node_modules/playwright",
@@ -37,7 +38,7 @@ const escape = (s) =>
       deviceScaleFactor: 1,
     });
     for (const card of cards) {
-      const colors = ["#c7f36b", "#b6a0f8", "#f4ba73"];
+      const colors = [theme.sage, theme.lavender, theme.apricot];
       const points =
         card.count === 2
           ? [
@@ -63,7 +64,7 @@ const escape = (s) =>
         )
         .join("");
       await page.setContent(`<!doctype html><style>
-      @font-face{font-family:Film;src:url(data:font/woff2;base64,${font})}*{box-sizing:border-box}body{margin:0;background:#11171b;color:#e7eee9;font-family:Film,sans-serif;width:1280px;height:720px;overflow:hidden}.bg{position:absolute;inset:0;background:radial-gradient(ellipse at 85% 45%,#24382e80,transparent 50%)}svg{position:absolute;inset:0}.content{position:absolute;top:216px;left:70px;width:850px}h1{font-size:57px;letter-spacing:-2px;line-height:1.25;margin:25px 0 24px;font-weight:400}.subtitle{font-size:18px;color:#9db0a4;letter-spacing:.1px}.accent{height:3px;width:64px;background:${escape(card.accent)};margin-top:40px}.chapters{position:absolute;left:70px;right:70px;bottom:79px;display:flex;gap:48px;border-top:1px solid #33443b;padding-top:27px}.chapter{color:#728b7e;font-size:12px;letter-spacing:1px}.chapter.active{color:${escape(card.accent)}}.chapter b{font-size:16px;margin-right:12px;font-weight:400}.foot{position:absolute;left:70px;bottom:32px;color:#637d6e;font-size:10px;letter-spacing:1.5px}
+      @font-face{font-family:Film;src:url(data:font/woff2;base64,${font})}*{box-sizing:border-box}body{margin:0;background:${theme.videoBackground};color:${theme.cream};font-family:Film,sans-serif;width:1280px;height:720px;overflow:hidden}.bg{position:absolute;inset:0;background:radial-gradient(ellipse at 85% 45%,#24382e80,transparent 50%)}svg{position:absolute;inset:0}.content{position:absolute;top:216px;left:70px;width:850px}h1{font-size:57px;letter-spacing:-2px;line-height:1.25;margin:25px 0 24px;font-weight:400}.subtitle{font-size:18px;color:#9db0a4;letter-spacing:.1px}.accent{height:3px;width:64px;background:${escape(card.accent)};margin-top:40px}.chapters{position:absolute;left:70px;right:70px;bottom:79px;display:flex;gap:48px;border-top:1px solid #33443b;padding-top:27px}.chapter{color:#728b7e;font-size:12px;letter-spacing:1px}.chapter.active{color:${escape(card.accent)}}.chapter b{font-size:16px;margin-right:12px;font-weight:400}.foot{position:absolute;left:70px;bottom:32px;color:#637d6e;font-size:10px;letter-spacing:1.5px}
       </style><div class="bg"></div><svg width="1280" height="720">${lines}${graphic}</svg><div class="content"><h1>${escape(card.title)}</h1><div class="subtitle">${escape(card.subtitle)}</div><div class="accent"></div></div><div class="chapters">${[
         ["01", "FRIENDS"],
         ["02", "CLERK + CUSTOMER"],

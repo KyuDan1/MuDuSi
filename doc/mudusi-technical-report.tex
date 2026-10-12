@@ -1,131 +1,119 @@
 \documentclass{article}
-\usepackage[preprint]{neurips_2025}
+\usepackage[preprint]{neurips_2026}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{microtype,booktabs,amsmath,amssymb,graphicx}
+\usepackage{microtype,booktabs,amsmath,amssymb}
+\usepackage[table]{xcolor}
+\definecolor{MuSage}{HTML}{B7D7C0}
+\definecolor{MuLavender}{HTML}{C9C0E8}
+\definecolor{MuApricot}{HTML}{E8C6AA}
+\definecolor{MuCream}{HTML}{FAF8F2}
+\definecolor{MuForest}{HTML}{28483D}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
-\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
-\usepackage{url}
-\title{MuDuSi: A Multi-Agent Acoustic Simulator\ for Full-Duplex Speech Language Models}
-\author{MuDuSi Project\\\url{https://github.com/KyuDan1/MuDuSi}}
+\usepackage[colorlinks=true,linkcolor=MuForest,citecolor=MuForest,urlcolor=MuForest]{hyperref}
+\hypersetup{pdftitle={MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models},pdfauthor={Kyudan Jung; Jaegul Choo},pdfsubject={Technical Report MUDUSI-TR-2026-01, Version 1.0, October 12, 2026},pdfkeywords={full-duplex speech, multi-agent simulation, acoustic trajectories, reinforcement learning}}
+\title{MuDuSi: A Multi-Agent Acoustic Simulator\\ for Full-Duplex Speech Language Models}
+\author{Kyudan Jung \qquad Jaegul Choo\\KAIST AI\\[3pt]
+Technical Report MUDUSI-TR-2026-01\\October 12, 2026\quad$\cdot$\quad Version 1.0\\
+\url{https://kyudan1.github.io/MuDuSi/paper/}}
 \newcommand{\code}[1]{\texttt{#1}}
 \begin{document}
 \maketitle
 \begin{abstract}
-MuDuSi (Multi-agent Duplex Simulator) provides a virtual testbed for full-duplex speech models, connecting independent sessions through a shared, sample-level acoustic environment without requiring a physical microphone and loudspeaker setup for every agent. Agents emit and receive audio concurrently, while a three-dimensional observer exposes source activity, receiver levels, propagation delays, and runtime diagnostics. The same acoustic engine supports two research workflows: frozen-model conversation inference and evaluation, and trajectory collection for reinforcement-learning integration. We describe the implemented contracts, the distinction between acoustic traces and token-policy rollouts, and bounded NVIDIA B200 experiments with PersonaPlex, Moshi, and Raon. Two 60-second PersonaPlex--Moshi experiments completed at wall-clock rate with zero dropped output samples or input overflows; recorded model inputs matched the preceding receiver blocks exactly after PCM16 encoding. Additional two- and three-agent conversations supply selected audiovisual demonstrations. These measurements establish audio routing and execution feasibility, not a semantic benchmark or a trained speech policy. We document startup buffering, recognition provenance, observed dialogue failures, and the interfaces still required for full-weight speech-model reinforcement learning.
+MuDuSi (Multi-agent Duplex Simulator) is a virtual acoustic testbed for independently running full-duplex speech models. It couples simultaneous listening and speaking through a 24 kHz PCM engine with distance-dependent attenuation, propagation delay, occlusion, reflection, and microphone noise, and visualizes their interaction in a shared 3D scene. The same engine supports frozen-model conversation evaluation and acoustic trajectory collection for reinforcement-learning research. We describe its timing and recording contracts and report bounded NVIDIA B200 experiments with PersonaPlex, Moshi, and Raon. Two 60-second PersonaPlex--Moshi runs completed at wall-clock rate with zero input overflows or dropped output samples; recorded model inputs exactly matched the preceding receiver blocks after PCM16 encoding. Additional two- and three-agent runs demonstrate concurrent generated speech and role-conditioned interaction. These results establish execution and routing feasibility, not semantic task performance. We distinguish acoustic trajectories from token-policy rollouts, document observed dialogue and synthesis failures, and identify the interfaces required for speech-model reinforcement learning.
 \end{abstract}
 
 \section{Introduction}
-Full-duplex speech models receive acoustic input while generating speech. This makes their interaction difficult to evaluate with text-only, alternating-turn harnesses: a speaker can continue, backchannel, or stop while another speaker is already active. Spatial effects add another distinction. What a source emits is not what every listener hears. Distance, occlusion, reflection, and microphone noise change the acoustic evidence available to each policy.
+Full-duplex speech models can listen while speaking, producing overlaps, backchannels, and interruptions that alternating-turn text harnesses cannot represent directly. In a shared room, each participant also hears a different signal: distance, occlusion, and noise transform the sound emitted by other participants. Studying these interactions with physical devices can require a separate microphone/loudspeaker setup for each agent and repeated room configuration.
 
-Testing a deployed conversational device can require microphone and loudspeaker hardware, controlled placement, and repeated room setup. Assigning each conversational participant a physical device makes multi-agent experiments cumbersome. A virtual testbed can exercise the interaction loop before that deployment: separate model sessions exchange spatially transformed audio, while an observer compares who emitted sound, what each agent received, and when. This reduces dependence on physical devices for software experiments; it does not replace final hardware, room, or perceptual validation.
+MuDuSi provides a software testbed before such deployment. Independent model sessions exchange audio through a common acoustic engine, while a 3D observer exposes source activity, local microphone mixtures, and timing. Its two workflows are frozen-model inference/evaluation and acoustic trajectory collection for reinforcement-learning (RL) research. Recorded experiments can be replayed without keeping GPUs allocated. This reduces dependence on physical devices for software experiments, but does not replace hardware or perceptual validation.
 
-MuDuSi (Multi-agent Duplex Simulator) makes this interaction explicit. Independent model workers exchange audio only through a shared acoustic engine. The engine records each emitted waveform, each spatially mixed receiver waveform, and the block presented to each model adapter. A browser observes the resulting scene without controlling its clock. Completed experiments can be replayed without keeping GPUs allocated.
+The contribution is an executable interaction substrate: simultaneous PCM actions, explicit receiver-to-input alignment, bounded asynchronous transport, and inspectable audiovisual records. We report engineering measurements from real model runs rather than a semantic benchmark. Full-weight speech-language model (SLM) RL is not implemented; the included trainable example is a small stochastic gate. The code and operational records are available at \url{https://github.com/KyuDan1/MuDuSi}.
 
-The project has two intended uses. In \emph{inference and evaluation}, frozen models converse under a chosen scene, and the investigator examines audio, timing, overlap, and optional recognition. In \emph{trajectory collection}, the investigator obtains aligned acoustic observations, emissions, rewards, and runtime state for analysis or a future learner. The currently implemented small REINFORCE example trains a synthetic listen/speak gate. Native speech-model inference does not expose the token probabilities needed to claim on-policy optimization of speech-language model (SLM) weights.
+\section{Related work}
+\paragraph{Speech models.} Moshi jointly models incoming and outgoing speech streams, with time-aligned text generation \citep{defossez2024moshi}. PersonaPlex adds role and voice conditioning to a Moshi-derived full-duplex model \citep{roy2026personaplex}. MuDuSi connects independent instances of such models through spatial microphone mixtures; it does not propose a new speech architecture. Whisper \citep{radford2023whisper} is used as an external recognizer, with its output kept separate from native model text.
 
-This report is an implementation and execution record, dated October 12, 2026, grounded in repository revision \code{4e4f0f4} and the recorded jobs identified below. It does not present a leaderboard, a new pretrained speech model, or evidence of improved task performance. Its contribution is a concrete experimental substrate and an auditable boundary between what has run and what remains to be implemented.
+\paragraph{Simulation and multi-agent interfaces.} MuJoCo supplies a physics engine designed for model-based control \citep{todorov2012mujoco}. MuDuSi shares the motivation of testing interacting policies in simulation, but models acoustic exchange rather than rigid-body/contact dynamics and does not use MuJoCo as its backend. PettingZoo standardizes multi-agent environment interaction \citep{terry2020pettingzoo}; MuDuSi's parallel dictionaries follow a similar interface convention, without claiming PettingZoo registration or compliance.
 
-\section{Models and scope}
-Moshi models parallel incoming and outgoing speech streams and jointly produces text and audio tokens \citep{defossez2024moshi}. PersonaPlex adds role and voice conditioning to a Moshi-derived full-duplex model \citep{roy2026personaplex}. In the arena, both are external inference workers. Their native text is retained as one evidence stream; it is never substituted for an acoustic observation. Raon is also connected through experimental bridges, with the runtime and audio-quality qualifications in Section~\ref{sec:raon}.
+\paragraph{Acoustic environments.} Pyroomacoustics provides room impulse-response simulation and audio-array processing tools \citep{scheibler2017pyroomacoustics}. SoundSpaces supplies geometrical acoustic renderings for audio-visual navigation in 3D environments \citep{chen2020soundspaces}. MuDuSi's present acoustics are deliberately simpler. Its focus is the closed interaction loop between independently stateful speech generators, live buffer diagnostics, and aligned source/receiver/input recordings. Neither richer room simulation nor spatial visualization alone establishes a validated speech-agent benchmark.
 
-The current scene exposes three named slots, \code{persona}, \code{moshi}, and \code{custom}. A slot name is an identifier rather than an architectural restriction: the cafe demonstration assigns PersonaPlex to both the first and second slots. A prerecorded WAV source is supported for controlled stimulation, but it is not counted as a model participant. The three-agent showcase uses two PersonaPlex instances and one Moshi instance, hence three participants and two model families.
-
-\section{System and acoustic contract}
+\section{Method: the simulation and recording contract}
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[font=\small, node distance=6mm, box/.style={draw,rounded corners,align=center,minimum height=10mm},arr/.style={-{Latex[length=2mm]},thick}]
-\node[box] (a) {Model workers\\independent processes / GPUs};
-\node[box,right=13mm of a] (b) {PCM acoustic engine\\24 kHz / 80 ms blocks};
-\node[box,below=9mm of b] (c) {Trace + emitted / received / input WAVs\\timing, buffers, rewards};
-\node[box,left=10mm of c] (d) {3D observer / replay\\optional receiver ASR};
+\begin{tikzpicture}[font=\small,box/.style={draw,rounded corners,align=center,minimum height=9mm},arr/.style={-{Latex[length=2mm]},thick}]
+\node[box,fill=MuSage] (a) {Independent model sessions\\separate workers / GPUs};
+\node[box,fill=MuLavender,right=14mm of a] (b) {Acoustic engine\\24 kHz / 80 ms blocks};
+\node[box,fill=MuApricot,below=9mm of b] (c) {Aligned trace and WAVs\\emitted / received / input};
+\node[box,fill=MuCream,left=10mm of c] (d) {3D observer and replay\\timing / buffers / optional ASR};
 \draw[arr] (a.north east) to[bend left=18] node[above]{emissions} (b.north west);
 \draw[arr] (b.south west) to[bend left=15] node[below]{local mixtures} (a.south east);
 \draw[arr] (b)--(c);\draw[arr] (c)--(d);
 \end{tikzpicture}
-\caption{Workers listen and speak concurrently. The observer consumes recorded or live state; it does not drive acoustic time. Privileged clean source audio is available to analysis, not fed to a peer model as its observation.}
-\label{fig:system}
+\caption{All sessions may emit and receive concurrently. The observer does not drive simulation time. Clean source audio is available for analysis, not substituted for a peer's microphone input.}
 \end{figure}
 
-\subsection{Simultaneous actions and delayed observations}
-The engine operates on mono float32 blocks with sample rate $f_s=24{,}000$ Hz and block length $B=1{,}920$, giving a decision interval $\Delta=B/f_s=80$ ms. At a boundary, each policy consumes its previous completed receiver block. All current emissions are then propagated together to produce the next observations. The initial input is silence. Missing actions in the parallel CPU environment represent silence.
-
-Let $x_i$ be the emitted waveform of agent $i$ and $y_j$ the microphone waveform for receiver $j$. With fixed geometry within an emission event, the direct component is
+\subsection{Acoustic dynamics and timing}
+The engine accepts simultaneous mono float32 emissions of $B=1{,}920$ samples at $f_s=24{,}000$ Hz, an 80 ms decision interval. Policies consume the previous completed receiver block; current emissions jointly determine the next observations. Initial model input is silence. For source $i$ and receiver $j$, direct pressure gain and delay are
 \begin{align}
- g_{ij}&=\frac{1}{\max(1,d_{ij})}\prod_{k\in\mathcal{O}_{ij}}10^{-L_k/20}, &
- \tau_{ij}&=\left\lceil\frac{d_{ij}}{343}f_s\right\rceil,\\
+ g_{ij}&=\frac{1}{\max(1,d_{ij})}\prod_{k\in\mathcal O_{ij}}10^{-L_k/20},\qquad
+ \tau_{ij}=\left\lceil d_{ij}f_s/343\right\rceil,
+ \\
  y_j[n]&=\sum_{i\ne j}g_{ij}x_i[n-\tau_{ij}]+r_j[n]+\epsilon_j[n].
 \end{align}
-Here $d_{ij}$ is Euclidean distance in meters, $L_k$ is the loss in dB of an intersected divider, and $\epsilon_j$ is independent Gaussian microphone noise with RMS $10^{\eta/20}$ for configured noise level $\eta$. There is no own-source path. Delay queues persist across block boundaries, and the ceiling prevents direct arrivals earlier than the modeled propagation time.
+Here $d_{ij}$ is distance in meters, $L_k$ is an intersected divider's loss in dB, and $\epsilon_j$ is independent Gaussian microphone noise with RMS $10^{\eta/20}$. There is no own-source path. Delay queues cross block boundaries. Geometry is evaluated at emission time, so moving an agent does not rewrite sound already in flight. The optional $r_j$ is one right-wall image-source reflection with gain $0.45\rho/\max(1,d^{\mathrm{refl}}_{ij})$. The reflection control $\rho$ is not a calibrated RT60. Raw superposition remains unclipped; WAV encoding and live inputs clamp to $[-1,1]$ and expose clipping counters.
 
-The optional $r_j$ term is one right-wall image-source reflection, with pressure gain $0.45\rho/\max(1,d^{\mathrm{refl}}_{ij})$ and corresponding delay. The control $\rho$ is a reflection amount, not a calibrated reverberation time. Geometry is evaluated when a block is emitted; later motion does not rewrite audio already in flight. Raw superposition remains unclipped. WAV encoding and live adapter inputs clamp to $[-1,1]$, with clipping diagnostics.
+Headless CPU steps advance without wall-clock pacing. Live evaluation instead uses a paced 80 ms clock and independent asynchronous worker send/receive loops. Bounded queues expose underruns, overflow, dropped samples, and final queued audio. Slow observers lose stale visual updates rather than backpressuring the acoustic loop. Physical propagation, block decision delay, codec buffering, and model inference are distinct latency sources. A fixed acoustic seed does not make asynchronous GPU trajectories bitwise reproducible.
 
-The block decision delay is distinct from physical propagation, codec buffering, and neural inference. For example, a 1 m path has approximately 2.9 ms acoustic travel time, but the peer policy still receives the preceding completed 80 ms observation block. Reporting only a propagation label or a server handler time would understate the full interaction path.
+\subsection{Inference, trajectories, and visualization}
+Each participant has a separate endpoint and model state. Two or three workers can converse in one scene; a WAV worker can instead provide controlled stimulation. The current engine has three named slots, not arbitrary agent counts. Multiple independent experiments require separate evaluator processes and output directories; the viewer is not a multi-scene scheduler.
 
-\subsection{Runtime isolation and observability}
-Headless CPU simulation advances deterministically without wall-clock pacing. Live evaluation instead uses independent asynchronous send/receive loops and a paced simulation clock. Bounded worker queues expose underruns, input overflow, dropped output, and queued samples. Slow browser observers lose stale visual frames rather than delaying the acoustic loop. A fixed engine seed does not make asynchronous GPU inference bitwise reproducible.
+The evaluator saves one JSONL snapshot per tick and three PCM16 WAVs per slot: emitted audio at the mixer boundary, the spatially mixed receiver signal, and the previous receiver block supplied to the adapter. Summaries preserve completion/failure, elapsed time, scheduler lateness, and final diagnostics. Partial failures remain identifiable. This same evaluator supplies an acoustic trajectory; there is no separate token-rollout mode.
 
-The viewer displays transmitted and received RMS separately. Its sound rings intentionally slow apparent propagation for visibility; they are not a physical clock. Levels are dBFS rather than calibrated sound-pressure levels. Speech activity uses a $-65$ dBFS energy threshold and is not a speech recognizer. These distinctions also apply to overlap statistics: simultaneous above-threshold emissions are not automatically inappropriate interruption.
+The parallel Python environment returns each agent's microphone PCM, own position, and time, plus acoustic rewards and boundary flags. All agents act simultaneously. A fixed horizon is truncation, not natural task termination. Rewards combine source-attributed audibility, an overlap penalty, and emission energy. They are development proxies: useful backchannels may incur a penalty, and audibility is not comprehension. A four-parameter Bernoulli listen/speak gate illustrates REINFORCE \citep{williams1992simple}, logging behavior probabilities and policy versions with parameters frozen during each rollout. It emits synthetic tones and does not update SLM weights.
 
-\section{Two research workflows}
-\subsection{Frozen-model inference and evaluation}
-The conversation launcher starts two or three native workers, assigns one job-local GPU per instance, waits for readiness, and runs a bounded evaluation. The pair launcher additionally supports a 24 kHz mono PCM16 stimulus. Each independent experiment runs in one Slurm allocation; launchers and transport ports remain local to that job. PersonaPlex and Moshi use separate Python environments because both upstream projects install a package named \code{moshi}.
+The 3D viewer shows transmitted and received RMS, activity, propagation labels, and buffer timing. dBFS is not calibrated sound pressure, and activity is a $-65$ dBFS energy detector. Animated wave rings deliberately slow apparent propagation. Engineering replay plays actual receiver audio; presentation videos mix clean emissions for intelligibility. Their speech bubbles are offline Whisper ASR on emitted audio, revealed at word timestamps, not native text or measured streaming-ASR latency.
 
-For each slot, the evaluator streams three WAVs: \code{emitted} is the source signal consumed by the mixer, \code{received} is the resulting local microphone mixture, and \code{input} is the previous receiver block presented to the adapter. A JSONL trace stores per-tick scene state, signal levels, reward terms, transcripts, and worker diagnostics. The summary records completion or failure, number of frames, elapsed wall time, scheduler lateness, and final state. Failures preserve partial artifacts and are not silently labeled complete.
+\section{Experiments and results}
+\subsection{Setup and measurements}
+Experiments ran on NVIDIA B200 GPUs (183,359 MiB each), driver 580.95.05, using isolated Slurm allocations. Paired runs requested two GPUs, 16 CPUs, and 96 GiB RAM; each model occupied one GPU. PersonaPlex and Moshi used separate Python environments because both install a package named \code{moshi}. The exercised model paths used Torch 2.8.0/CUDA 12.8 and an NVIDIA PyTorch 25.04 worker image for runtime compilation. PersonaPlex's reused environment had dependency conflicts outside the tested inference path; successful runs do not certify that entire environment.
 
-Replay loads those finished artifacts. It cannot modify recorded acoustics and does not reconnect to model workers. The engineering view can play a selected receiver's actual mixture. The presentation view instead plays a clean sum of participant emissions for intelligible demonstration; exported video applies loudness mastering. Consequently, a showcase soundtrack is not evidence of what any specific model heard. That evidence resides in receiver and input WAVs.
-
-\subsection{Acoustic trajectories for learning integration}
-Trajectory collection is a research workflow using the same evaluator, not a separate CLI mode. A model conversation already supplies an \emph{acoustic trajectory}: time-indexed emissions, microphone observations, geometry, proxy rewards, and diagnostics. Such traces support debugging, dataset construction, replay, and development of future reward functions. They do not reveal which model tokens were sampled or their probabilities.
-
-The CPU interface \code{DuplexArenaEnv} provides parallel dictionaries for observations, rewards, terminations, truncations, and information. Each observation includes local microphone PCM, the agent's own position, and simulation time. It excludes other agents' clean source signals and future audio. Each action is one emitted PCM block. The fixed horizon is a truncation, not a natural task termination. This interface resembles a parallel multi-agent environment but is not registered as a PettingZoo environment.
-
-The implemented acoustic reward combines three transparent proxies. Source-attributed delivered levels, relative to $\max(-65,\eta+6)$ dBFS, produce an audibility contribution bounded between zero and $0.10$. An active source receives $-0.04$ when more than one source is active. Emission energy contributes $-0.015(\operatorname{RMS}(x_i)/0.2)^2$. The audibility term uses source-attributed energy before noise, not recognition correctness. Penalizing all overlap can penalize useful backchannels; maximizing this reward cannot establish better dialogue.
-
-The example \code{examples/on\_policy.py} learns a four-parameter Bernoulli gate per agent. Its features include local received RMS and time features; an active gate emits a synthetic sinusoid. Policies remain frozen throughout an episode. The trace records policy version, sampled gate, behavior log-probability, reward decomposition, and truncation. Discounted returns with $\gamma=0.97$ drive a REINFORCE-style update \citep{williams1992simple}, using a baseline from previous rollouts. This is a working policy-gradient integration example, not an SLM learner or a demonstration of learned conversational ability.
-
-\section{B200 execution evidence}
-\subsection{Environment and protocol}
-The inspected server exposed NVIDIA B200 devices with 183,359 MiB each, driver 580.95.05, and driver CUDA ceiling 13.0. Timed model experiments ran in isolated Slurm jobs, with two GPUs, 16 CPU cores, and 96 GiB host RAM for the paired conversations. The worker image was NVIDIA PyTorch 25.04, providing a compiler for runtime kernel generation. Both primary model environments used Torch 2.8.0 with CUDA 12.8 wheels; the arena used a separate Python 3.13 environment.
-
-PersonaPlex's upstream dependency metadata pins an older Torch version, and its reused environment had unrelated package conflicts. The measurements validate the exercised inference path, not a clean dependency resolution for every installed package. Moshi's independent environment passed its dependency check. Exact source/checkpoint revisions and operational details are recorded in \href{https://github.com/KyuDan1/MuDuSi/blob/main/docs/B200_VERIFICATION.md}{the B200 execution record}.
-
-Two primary experiments used the same spoken rice-cooking stimulus, derived from PersonaPlex's example WAV and converted to the arena format. The stimulus occupied the third slot, with spoken intervals around 4.08--8.56 s and 22.64--26.88 s. Each experiment ran for 750 frames (60 s). The near condition used 1 m model separation, no divider, and $-72$ dBFS noise. The distant condition used 5.70 m separation, a 14 dB divider, and $-35$ dBFS noise. The conditions change several factors together and are not an acoustic ablation.
+Two 60-second (750-frame) PersonaPlex--Moshi experiments used the same spoken rice-cooking WAV stimulus in the third slot. The near condition used 1 m model separation, no divider, and $-72$ dBFS microphone noise. The distant condition used 5.70 m separation, a 14 dB divider, and $-35$ dBFS noise. These jointly changed factors are not an acoustic ablation. We measured pacing, buffer health, activity overlap, and source/receiver/input consistency. Timing starts after worker readiness, excluding startup and scheduling.
 
 \begin{table}[t]
 \centering
-\caption{Bounded PersonaPlex--Moshi experiments. Timing is measured after startup. Underruns are startup frames; no prefill was used. Overlap duration counts the two models only.}
+\caption{Measured paired conversations. Overlap counts the two models, excluding the stimulus. Handler timing is not end-to-end response latency.}
 \label{tab:pair}
 \begin{tabular}{lrr}\toprule
+\rowcolor{MuCream}
 Measurement & Near / quiet & Distant / cocktail\\\midrule
 Slurm job & 189794 & 189798\\
 Audio / wall duration (s) & 60 / 60.011 & 60 / 60.007\\
 Scheduler lateness, p95 (ms) & 1.45 & 2.04\\
-Tick deadline overruns & 0 & 0\\
-Input overflow / dropped samples & 0 / 0 & 0 / 0\\
-PersonaPlex / Moshi underrun frames & 1 / 2 & 1 / 2\\
+Tick overruns / input overflow / dropped samples & 0 / 0 / 0 & 0 / 0 / 0\\
+PersonaPlex / Moshi startup underrun frames & 1 / 2 & 1 / 2\\
 Moshi handler mean / p95 (ms) & 24.59 / 26.15 & 24.19 / 26.20\\
 Both models active (s) & 3.12 & 6.56\\
-Direct path pressure gain (dB) & 0 & $-29.12$\\\bottomrule
+Direct model-to-model pressure gain (dB) & 0 & $-29.12$\\\bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Routing, timing, and memory}
-For every receiver in both paired runs, the saved input block at tick $t$ matched the PCM16 encoding of the received block at $t-1$ exactly, with an initial silent input. Re-rendering recorded source WAVs through the mixer reproduced received audio to maximum normalized amplitude errors of $9.2\times10^{-5}$ and $4.5\times10^{-5}$ for near and distant runs, respectively. Small differences arise from recording quantization. These checks establish the intended route into the adapter; native transport encoding remains a separate codec stage.
+\subsection{Routing and runtime evidence}
+For every receiver in both runs, recorded input at tick $t$ exactly matched PCM16-encoded received audio at $t-1$, with initial silence. Re-rendering saved emissions through the mixer reproduced received WAVs within maximum normalized amplitude errors of $9.2\times10^{-5}$ and $4.5\times10^{-5}$, respectively; the small discrepancies reflect source/WAV quantization. This verifies delivery to the adapter, with native transport encoding remaining a separate codec stage.
 
-Table~\ref{tab:pair} shows wall-clock completion and scheduler diagnostics. Startup underruns occurred before model output arrived, and one queued 80 ms block remained at the fixed episode boundary. No ADC or Opus-decoder clipping was counted. Moshi handler times measure the server's frame-processing scope, not end-to-end response latency.
+Both experiments completed at wall-clock rate (Table~\ref{tab:pair}), with no counted ADC or decoder clipping. Underruns occurred before initial generated samples arrived; buffers were not prefilled. One 80 ms block remained queued at the fixed endpoint. Near-run monitoring reported approximately 17,839 MiB for Moshi and 19,625 MiB for PersonaPlex, 36.4 GiB host working memory, and no OOM or CPU throttling. These are sampled readings, not allocator peaks or training-memory estimates. Paced completion does not measure maximum throughput.
 
-A one-minute monitoring window during the near run reported approximately 17,839 MiB for Moshi and 19,625 MiB for PersonaPlex, with about 36.4 GiB host working memory and no OOM or CPU-throttling events. These are sampled monitoring-window readings, not exact allocator peaks. They should not be reused as optimizer-state estimates for training.
+Receiver ASR recognized cooking-answer content in the peer's microphone recording. The second stimulus began while Moshi spoke, with overlap and later stop/resume visible in the traces. This establishes an interruption stimulus and activity, not causal intentional yielding. Noisy receiver ASR also hallucinated repetitions; neither recognition nor native text is ground-truth comprehension.
 
-Offline Whisper recognition \citep{radford2023whisper} found cooking-answer content in PersonaPlex's received audio and PersonaPlex speech in Moshi's received audio. The second stimulus began while Moshi was active; overlap and subsequent stopping/resuming were visible. This establishes an interruption stimulus and response activity, not a causal measure of intentional yielding. Noisy receiver recognition also contained hallucinated repetitions. Neither ASR nor model-generated text is treated as ground-truth comprehension.
+\subsection{Model-only conversations and failure cases}
+Additional runs used no prerecorded speaker (Table~\ref{tab:showcase}). The cafe workers received clerk/customer roles, voice prompts, and menu context, not scripted dialogue. The selected passage contains an iced oat-latte and croissant order and confirmation. The full run includes initial role confusion and an incorrect price. Longer friends and three-agent conversations contain monologues and repetitive backchannels; selecting favorable clips introduces selection bias.
 
-\subsection{Two- and three-agent demonstrations}
 \begin{table}[t]
 \centering
-\caption{Additional conversations used for selected audiovisual examples. Every model occupied a separate B200. Each run had zero input overflow, output drops, and clipping.}
+\caption{Additional independent conversations; all had zero input overflow, output drops, and clipping. Three participants comprise two model families.}
 \label{tab:showcase}
 \begin{tabular}{lrrr}\toprule
+\rowcolor{MuCream}
  & Friends & Clerk / customer & Three agents\\\midrule
 PersonaPlex / Moshi instances & 1 / 1 & 2 / 0 & 2 / 1\\
 Slurm job & 189846 & 189891 & 189845\\
@@ -136,45 +124,22 @@ Selected interval (s) & 0--26.92 & 9.50--30.25 & 0--14.92\\\bottomrule
 \end{tabular}
 \end{table}
 
-The conversations in Table~\ref{tab:showcase} have no prerecorded speaker. In the cafe run, PersonaPlex workers receive clerk/customer roles, voice prompts, and menu context; their dialogue lines are not scripted. The selected passage contains an iced oat-latte and croissant order and confirmation. The full recording also includes initial customer/clerk role confusion and an incorrect price, excluded from the selected clip. Longer friends and three-agent recordings include monologues and repetitive backchannels. Selection makes the examples useful for presentation but introduces clear selection bias.
+All connected model inputs matched their previous receiver blocks. Full-run overlap measured 10.96 s for friends and 48.08 s for three agents; the selected intervals contain 3.76 s and 6.96 s. These are activity statistics, not dialogue-quality scores.
 
-Full-run model overlap was 10.96 s for the friends run and 48.08 s for the three-agent run; selected intervals contain 3.76 s and 6.96 s, respectively. These are activity measurements, not quality scores. Every connected model's recorded input matched its preceding receiver block. The presentation uses a slowly rotating 3D camera, word-timed speech bubbles, activity lanes, and timing counters. Bubbles derive from \emph{offline Whisper-small on emitted audio}, revealed at word timestamps. Their streaming appearance is not a measurement of online ASR latency.
+The direct Raon PyTorch bridge generated audio/text but averaged 207 ms per 80 ms frame and filled its 32-frame input queue after 4.24 simulated seconds (job 189796). An optimized SGLang path, after CUDA runtime/library-path fixes, completed 60 s in 60.012 s with 1.68 ms p95 lateness and zero overflow/drops (job 189820). Raon had six startup underrun frames and 480 ms queued at the endpoint. Monitoring reported about 90,085 MiB for Raon, including preallocated cache. A warmup mismatch and missing intended sliding-window behavior in an attention fallback remained. Later generated audio diverged substantially from native text and contained garbled phrases. These are unresolved quality failures; the warnings are candidate causes, not established causal explanations.
 
-\subsection{Raon: transport feasibility with unresolved quality}\label{sec:raon}
-The direct Raon PyTorch bridge produced actual text and audio but averaged 207 ms per 80 ms frame. Its 32-frame input queue filled after 4.24 simulated seconds, and job 189796 failed while preserving a partial trace. The worker reported about 19.4 GiB peak PyTorch allocation. This bridge did not meet real-time requirements.
+\section{Limitations and research directions}
+The current acoustics use three slots, quadratic source--receiver paths, nondirectional mono signals, and a single reflection. There is no validated room impulse response, HRTF, calibrated SPL, or physical loudspeaker feedback loop. The execution record contains a small number of stochastic episodes without repeated-seed confidence intervals, human intelligibility labels, or controlled counterfactual interruption trials. Changed acoustics also change downstream model actions, preventing isolated causal attribution. Selected demonstrations and low scheduler lateness cannot establish semantic performance.
 
-An optimized SGLang path required an isolated CUDA 13 runtime overlay and library-path correction. Job 189820 subsequently completed 60 s in 60.012 wall seconds, with 1.68 ms p95 scheduler lateness, zero input overflow/output drops, and no clock overruns. Raon had six startup underrun frames and 480 ms queued at episode end. Monitoring reported about 90,085 MiB for Raon and 19,697 MiB for PersonaPlex; the larger Raon footprint includes SGLang's preallocated cache.
+Diarization-capable models could consume mixed receiver audio through suitable adapters, but no diarization-specific output contract, identity metric, or verified result is implemented. Known source IDs and caption labels are provenance, not inferred speaker identities. Such evaluation requires timestamped predicted speakers, receiver-aligned reference activity, and overlap-aware scoring. More agents, vectorized scenes, and richer acoustics also require implementation beyond the present viewer.
 
-Successful transport did not imply clean synthesis. Warmup encountered a mask/embedding mismatch and fell back; the loader also warned that the SDPA Mimi fallback lacked intended sliding-window behavior. Later emitted audio substantially diverged from generated text and contained garbled phrases. These are candidate implementation causes, not proven causal explanations. Raon was therefore excluded from the showcase and is not certified here for long-form audio quality.
+Full SLM RL requires sampled text/audio-code token IDs, behavior log-probabilities under the actual sampling distribution, valid-action masks, policy/checkpoint versions, reset boundaries, and token-to-PCM timing. A critic additionally needs aligned values; privileged critic features must remain separate from actor inputs. Version barriers must finish or discard old-policy episodes before publishing new weights. The next step is an instrumented frozen worker with probability recomputation, followed by a bounded adapter/LoRA update and held-out evaluation. Acoustic recordings or ASR reconstruction alone are insufficient to claim an on-policy SLM update.
 
-\section{Extensibility of the virtual testbed}
-Each participant is an independent model session with its own streaming state and endpoint. The 3D view places these sessions in one shared scene, making simultaneous activity and different receiver mixtures visible. Noise, positions, dividers, and scenario presets enable controlled software experiments. Separate evaluator processes can run independent experiments with distinct ports and output directories; the current viewer does not provide a dashboard or scheduler for multiple concurrent scenes.
+\section{Conclusion}
+MuDuSi provides a virtual shared acoustic space for independent full-duplex speech sessions, with observable timing and aligned trajectories. B200 runs verify paced execution and the route from model emissions to peer adapter inputs. Dialogue failures, Raon synthesis degradation, simplified acoustics, and missing token-policy interfaces limit broader claims. The simulator supplies a practical foundation for controlled conversation evaluation and future RL integration, while keeping those engineering capabilities distinct from demonstrated conversational competence.
 
-Models with speaker-diarization or speaker-tracking capabilities are a natural extension: a compatible worker can consume a mixed microphone stream containing several sources. However, MuDuSi currently has no diarization-specific adapter contract, identity-tracking metric, or verified diarization-model result. Known simulator source IDs and emitted-audio caption labels are provenance annotations, not identities inferred from a mixture. Evaluating such models would require timestamped predicted speaker labels, a reference mapping from source activity to receiver time, and overlap-aware scoring. Extra spatial or multichannel inputs would also require extending the current mono PCM contract.
-
-The same testbed supplies acoustic trajectories and a trainer-controlled environment interface for RL development. Increasing the number of agents, vectorizing scenes, adding richer acoustics, and integrating model-internal policy actions remain separate engineering steps. The implemented three-slot scene and toy gate learner do not establish a general multi-scene SLM training platform.
-
-\section{From acoustic traces to SLM reinforcement learning}
-A gradient-capable learner needs model actions, not an ASR reconstruction of speech. The next interface must expose episode and agent identifiers, checkpoint revision, policy version, sampling configuration, input sample interval, sampled text/audio-code token IDs, token positions, behavior log-probabilities, valid-action masks, and token-to-emitted-sample alignment. Value estimates are needed when the selected learner uses a critic. Reset boundaries, recurrent/KV state, and truncation versus termination must also be explicit.
-
-A defensible implementation sequence is:
-\begin{enumerate}
-\item Instrument one frozen model and recompute logged behavior probabilities under identical weights, history, masks, and sampling transforms. Temperature or top-$k$ changes must be reflected in the distribution being logged.
-\item Add policy-version barriers. Finish or discard version-$v$ episodes before publishing version $v+1$, reset model state, and acknowledge the new version before collecting its actions. Pausing a socket is insufficient.
-\item Align acoustic rewards and advantages to sampled tokens, including delayed propagation and truncated episodes. Keep privileged critic state separate from each actor's microphone observation.
-\item Validate a bounded adapter/LoRA update with finite gradients, checkpoint/resume, and reference-policy controls before considering full-weight distributed optimization.
-\item Evaluate a frozen baseline and updated policy on held-out, labeled tasks with repeated seeds and controlled stimuli. Measure intelligibility, task success, turn timing, and interruption recovery separately.
-\end{enumerate}
-The existing REINFORCE gate supplies a small example of frozen-policy rollout bookkeeping. It does not satisfy these model-internal contracts. Full-weight SLM RL remains future work, and no learning curves or trained-model improvements are claimed.
-
-\section{Limitations, reproducibility, and responsible use}
-The acoustic engine is intentionally simple: three slots, quadratic source--receiver paths, a single reflection, nondirectional sources/microphones, and no validated room impulse response or HRTF. It models neither calibrated SPL nor a physical loudspeaker--microphone feedback loop. A more realistic environment should validate measured or richer simulated impulse responses before using spatial outcomes as perceptual predictions.
-
-The execution evidence consists of a small number of bounded episodes with stochastic models. It lacks repeated-seed confidence intervals, human intelligibility labels, and controlled counterfactual interruption trials. Changed acoustic conditions also alter downstream model actions, preventing isolated attribution to distance, noise, or occlusion. Selected videos cannot substitute for full-run evaluation. Low scheduler lateness and zero dropped buffers establish engineering behavior rather than language understanding.
-
-Re-execution requires independent model environments, authorized local model weights, and the documented GPU launchers. Local credentials, private paths, model weights, and large recordings are excluded from version control. The public repository includes generic configurations, the acoustic and evaluation code, tests, the replay renderer, and this report. Relevant source entry points are \code{acoustics.py}, \code{engine.py}, \code{evaluation.py}, \code{env.py}, and \code{examples/on\_policy.py}; detailed commands are maintained in the README and GPU/server documentation.
-
-Audio conditioning and generated speech must respect model licenses and voice permissions. Label generated audio and caption provenance. A plausible transcript or confident synthetic voice does not establish factual correctness, as the cafe price error illustrates. Retain unselected trajectories and failure summaries alongside curated media so that favorable examples do not erase observed failures.
+\paragraph{Reproducibility and release.}
+This self-published MuDuSi Project technical report documents the experiments above, whose original implementation is recorded at revision \code{4e4f0f4}. The repository's B200 verification and showcase documents retain job provenance, model revisions, rerun commands, and limitations. Generic configurations, tests, and report sources are public; weights, credentials, private settings, and large raw recordings are excluded. Generated audio and caption provenance should remain labeled, with model licenses and voice permissions respected. This report uses the NeurIPS 2026 preprint format and makes no claim of conference submission or acceptance.
 
 \clearpage
 \bibliographystyle{plainnat}

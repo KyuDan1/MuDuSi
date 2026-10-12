@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models</title>
+  <meta name="description" content="Technical report by Kyudan Jung and Jaegul Choo on MuDuSi, a virtual acoustic testbed for full-duplex speech agents.">
+  <link rel="canonical" href="https://kyudan1.github.io/MuDuSi/paper/">
+  <meta name="citation_title" content="MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models">
+  <meta name="citation_author" content="Kyudan Jung">
+  <meta name="citation_author" content="Jaegul Choo">
+  <meta name="citation_publication_date" content="2026/10/12">
+  <meta name="citation_technical_report_institution" content="MuDuSi Project">
+  <meta name="citation_technical_report_number" content="MUDUSI-TR-2026-01">
+  <meta name="citation_pdf_url" content="https://kyudan1.github.io/MuDuSi/paper/mudusi-technical-report.pdf">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .paper-page{max-width:900px;margin:0 auto;padding:30px 28px 60px;font-size:17px;line-height:1.48}.paper-page h1{font-size:32px;line-height:1.12;letter-spacing:-.018em;margin:0 0 12px}.paper-authors{margin:0 0 3px;font-size:19px}.paper-affiliation{margin:0 0 6px;font-size:16px}.paper-meta{font-family:var(--mono);font-size:11px;color:var(--muted-ink);margin:0 0 17px}.paper-page h2{font-size:22px;letter-spacing:0;margin:0 0 8px}.paper-abstract{margin-bottom:18px}.paper-downloads{display:flex;flex-wrap:wrap;gap:10px 22px;font-family:var(--mono);font-size:12px;margin:18px 0 26px}.paper-citation{border-top:1px solid var(--line);padding-top:22px;margin:0}.paper-citation pre{font-size:16px;white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:18px}.paper-note{font-size:14px;color:var(--muted-ink)}@media(max-width:600px){.paper-page{padding:20px 20px 40px;font-size:16px}.paper-page h1{font-size:27px}.paper-meta{font-size:10px}}
+    .paper-page h1{color:var(--forest)}.paper-meta{border-bottom:2px solid var(--sage);padding-bottom:10px}.paper-citation{border-top:2px solid var(--apricot)}.paper-citation pre{background:#f0ecf7;border-left:3px solid var(--lavender);color:var(--forest)}.paper-downloads{gap:10px}.paper-downloads a{color:var(--forest);background:#edf3eb;border:1px solid var(--sage);padding:6px 10px;text-decoration:none}.paper-downloads a:nth-child(2){background:#f0ecf7;border-color:var(--lavender)}.paper-downloads a:nth-child(3){background:#f6ece2;border-color:var(--apricot)}.paper-downloads a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <main class="paper-page">
+    <h1>MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models</h1>
+    <p class="paper-authors">Kyudan Jung · Jaegul Choo</p>
+    <p class="paper-affiliation">KAIST AI</p>
+    <p class="paper-meta">October 12, 2026 · Version 1.0 · MUDUSI-TR-2026-01</p>
+    <h2>Abstract</h2>
+    <p class="paper-abstract">MuDuSi (Multi-agent Duplex Simulator) is a virtual acoustic testbed for independently running full-duplex speech models. It couples simultaneous listening and speaking through a 24 kHz PCM engine with distance-dependent attenuation, propagation delay, occlusion, reflection, and microphone noise, and visualizes their interaction in a shared 3D scene. The same engine supports frozen-model conversation evaluation and acoustic trajectory collection for reinforcement-learning research. We describe its timing and recording contracts and report bounded NVIDIA B200 experiments with PersonaPlex, Moshi, and Raon. Two 60-second PersonaPlex–Moshi runs completed at wall-clock rate with zero input overflows or dropped output samples; recorded model inputs exactly matched the preceding receiver blocks after PCM16 encoding. Additional two- and three-agent runs demonstrate concurrent generated speech and role-conditioned interaction. These results establish execution and routing feasibility, not semantic task performance. We distinguish acoustic trajectories from token-policy rollouts, document observed dialogue and synthesis failures, and identify the interfaces required for speech-model reinforcement learning.</p>
+    <div class="paper-downloads"><a href="mudusi-technical-report.pdf">Full paper (PDF)</a><a href="citation.bib">BibTeX</a><a href="../">Project &amp; demonstrations</a><a href="https://github.com/KyuDan1/MuDuSi">Source code</a></div>
+    <section class="paper-citation" aria-labelledby="citation-heading">
+      <h2 id="citation-heading">Citation</h2>
+      <pre><code>@techreport{jung2026mudusi,
+  author      = {Jung, Kyudan and Choo, Jaegul},
+  title       = {{MuDuSi}: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models},
+  institution = {MuDuSi Project},
+  type        = {Technical Report},
+  number      = {MUDUSI-TR-2026-01},
+  year        = {2026},
+  month       = oct,
+  note        = {Version 1.0, October 12, 2026},
+  url         = {https://kyudan1.github.io/MuDuSi/paper/}
+}</code></pre>
+      <p class="paper-note">Technical report published by the MuDuSi Project. The report uses the NeurIPS 2026 preprint format; it is not a statement of conference acceptance or institutional endorsement.</p>
+    </section>
+  </main>
+</body>
+</html>

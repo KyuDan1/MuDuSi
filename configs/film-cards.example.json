@@ -5,7 +5,7 @@
     "subtitle": "Multi-agent Duplex Simulator",
     "number": "00",
     "count": 3,
-    "accent": "#c7f36b"
+    "accent": "#B7D7C0"
   },
   {
     "file": "friends.png",
@@ -13,7 +13,7 @@
     "subtitle": "PersonaPlex + Moshi",
     "number": "01",
     "count": 2,
-    "accent": "#c7f36b"
+    "accent": "#B7D7C0"
   },
   {
     "file": "cafe.png",
@@ -21,7 +21,7 @@
     "subtitle": "Two PersonaPlex agents at a coffee shop",
     "number": "02",
     "count": 2,
-    "accent": "#f4ba73"
+    "accent": "#C9C0E8"
   },
   {
     "file": "three.png",
@@ -29,6 +29,6 @@
     "subtitle": "Two PersonaPlex agents + Moshi",
     "number": "03",
     "count": 3,
-    "accent": "#b6a0f8"
+    "accent": "#E8C6AA"
   }
 ]

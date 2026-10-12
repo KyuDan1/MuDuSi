@@ -4,35 +4,35 @@
   "segments": [
     {
       "kind": "card",
-      "path": "output/film-cards-mudusi/intro.png",
+      "path": "output/film-cards-mudusi-pastel/intro.png",
       "seconds": 4
     },
     {
       "kind": "card",
-      "path": "output/film-cards-mudusi/friends.png",
+      "path": "output/film-cards-mudusi-pastel/friends.png",
       "seconds": 3
     },
     {
       "kind": "video",
-      "path": "output/mudusi-two-agents-en.mp4"
+      "path": "output/mudusi-two-agents-pastel.mp4"
     },
     {
       "kind": "card",
-      "path": "output/film-cards-mudusi/cafe.png",
+      "path": "output/film-cards-mudusi-pastel/cafe.png",
       "seconds": 3
     },
     {
       "kind": "video",
-      "path": "output/mudusi-cafe-en.mp4"
+      "path": "output/mudusi-cafe-pastel.mp4"
     },
     {
       "kind": "card",
-      "path": "output/film-cards-mudusi/three.png",
+      "path": "output/film-cards-mudusi-pastel/three.png",
       "seconds": 3
     },
     {
       "kind": "video",
-      "path": "output/mudusi-three-agents-en.mp4"
+      "path": "output/mudusi-three-agents-pastel.mp4"
     }
   ]
 }

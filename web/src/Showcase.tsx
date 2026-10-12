@@ -1,3 +1,4 @@
+import { agentColors } from "./theme";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import Arena from "./Arena";
@@ -18,11 +19,7 @@ declare global {
     arenaReady?: boolean;
   }
 }
-const colors: Record<string, string> = {
-  persona: "#c7f36b",
-  moshi: "#b6a0f8",
-  custom: "#f4ba73",
-};
+const colors = agentColors;
 export default function Showcase() {
   const [record, setRecord] = useState<Recording>();
   const [time, setTime] = useState(0);

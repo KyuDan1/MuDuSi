@@ -10,7 +10,7 @@
   height: 100vh;
   min-height: 600px;
   overflow: hidden;
-  background: #11171b;
+  background: #111B18;
   color: #e8eee9;
   font-family: ArenaSans, Arial, sans-serif;
 }
@@ -65,10 +65,10 @@
   font-style: normal;
   font-size: 10px;
   letter-spacing: 1.5px;
-  color: #b3d292;
+  color: #B7D7C0;
 }
 .showcase-time em.overlap {
-  color: #f4ba73;
+  color: #E8C6AA;
 }
 .showcase-world {
   position: absolute;
@@ -101,7 +101,7 @@
   gap: 40px;
   padding-top: 18px;
   border-top: 1px solid #33433b;
-  background: linear-gradient(transparent, #11171b 30%);
+  background: linear-gradient(transparent, #111B18 30%);
 }
 .showcase-tracks {
   display: flex;
@@ -173,10 +173,10 @@
 }
 .showcase-controls input {
   flex: 1;
-  accent-color: #c7f36b;
+  accent-color: #B7D7C0;
 }
 .showcase-controls button {
-  background: #c7f36b;
+  background: #B7D7C0;
   color: #162019;
   border: 0;
   border-radius: 5px;
@@ -207,8 +207,8 @@
 }
 .showcase-loading {
   height: 100vh;
-  background: #11171b;
-  color: #c7f36b;
+  background: #111B18;
+  color: #B7D7C0;
   display: grid;
   place-items: center;
 }

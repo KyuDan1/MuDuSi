@@ -209,3 +209,36 @@ sbatch --cpus-per-task=16 workers/render.sbatch \
 
 Wait for all three render jobs to complete before submitting `edit_film.sbatch`,
 or use Slurm `--dependency=afterok:JOB1:JOB2:JOB3`.
+
+
+## MuDuSi pastel presentation
+
+The paper, README banner, project page, and current videos share the palette in
+[`configs/visual-theme.json`](../configs/visual-theme.json). Colors identify slots:
+`persona` is sage, `moshi` lavender, and `custom` apricot, regardless of the model
+assigned to that slot. The source recordings and generated speech are unchanged.
+
+After building the frontend and setting the browser/Node environment described above,
+render the three selected English excerpts as independent CPU batch jobs:
+
+```bash
+sbatch workers/render.sbatch --recording runs/showcase-2 \
+  --output output/mudusi-two-agents-pastel.mp4 --start 0 --seconds 26.92 --fps 24 \
+  --title 'Two friends' --subtitle 'PersonaPlex + Moshi'
+sbatch workers/render.sbatch --recording runs/cafe-customer \
+  --output output/mudusi-cafe-pastel.mp4 --start 9.5 --seconds 20.75 --fps 24 \
+  --title 'Clerk and customer' --subtitle 'Two PersonaPlex agents at a coffee shop'
+sbatch workers/render.sbatch --recording runs/showcase-3 \
+  --output output/mudusi-three-agents-pastel.mp4 --start 0 --seconds 14.92 --fps 24 \
+  --title 'Three-way conversation' --subtitle 'Two PersonaPlex agents + Moshi'
+node workers/title_cards.cjs configs/film-cards.example.json \
+  work/film-font.woff2 output/film-cards-mudusi-pastel
+# Run only after the three rendering jobs finish successfully:
+sbatch workers/edit_film.sbatch --manifest configs/film.example.json \
+  --output output/mudusi-introduction.mp4
+```
+
+The selected recordings are private runtime artifacts and are not bundled with the
+repository. Use your own completed recordings or the published project-page clips.
+The introduction retains the order title → friends → clerk/customer → three agents,
+with silent transition padding so the crossfades do not overlap adjacent speech.

@@ -1,3 +1,4 @@
+import theme, { agentColors } from "./theme";
 import { Component, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -13,8 +14,7 @@ import type { Agent, Snapshot } from "./types";
 
 const colorOf = (agent: Agent) =>
   agent.color ||
-  ({ persona: "#c7f36b", moshi: "#b6a0f8", custom: "#f4ba73" }[agent.id] ??
-    "#8ad4da");
+  (agentColors[agent.id] ?? theme.sage);
 
 function SoundWave({
   color,
@@ -399,8 +399,8 @@ function Scene({
   const uniqueLinks = state.links.filter((link) => link.source < link.target);
   return (
     <>
-      <color attach="background" args={["#11171b"]} />
-      <fog attach="fog" args={["#11171b", 22, 43]} />
+      <color attach="background" args={[theme.videoBackground]} />
+      <fog attach="fog" args={[theme.videoBackground, 22, 43]} />
       <ambientLight intensity={0.85} />
       <hemisphereLight args={["#d6e9ff", "#445341", 1.4]} />
       <directionalLight

@@ -1,3 +1,4 @@
+import { agentColors } from "./theme";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Activity,
@@ -31,11 +32,7 @@ import {
 import Arena from "./Arena";
 import type { Agent, Control, Snapshot } from "./types";
 
-const colors: Record<string, string> = {
-  persona: "#c9ee83",
-  moshi: "#b4a0ef",
-  custom: "#efbc7d",
-};
+const colors = agentColors;
 const scenarioLabels: Record<string, string> = {
   roundtable: "Roundtable",
   interruption: "Interruption",
@@ -311,7 +308,7 @@ export default function App() {
   const enabled = status === "connected" && !!state;
   const agent =
     state?.agents.find((a) => a.id === selected) ?? state?.agents[0];
-  const color = agent?.color || colors[agent?.id ?? "persona"] || "#c9ee83";
+  const color = agent?.color || colors[agent?.id ?? "persona"] || "#B7D7C0";
   const configure = (value: Omit<Control, "action">) =>
     void control({ action: "configure", ...value });
   useEffect(() => {
@@ -709,13 +706,13 @@ export default function App() {
             </div>
             <div className="scene-legend">
               <span>
-                <i style={{ background: "#c9ee83" }} /> PersonaPlex
+                <i style={{ background: "#B7D7C0" }} /> PersonaPlex
               </span>
               <span>
-                <i style={{ background: "#b4a0ef" }} /> Moshi
+                <i style={{ background: "#C9C0E8" }} /> Moshi
               </span>
               <span>
-                <i style={{ background: "#efbc7d" }} /> Custom SLM
+                <i style={{ background: "#E8C6AA" }} /> Custom SLM
               </span>
             </div>
             <div className="scene-caption">

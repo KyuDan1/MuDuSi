@@ -39,7 +39,7 @@
             <div><dt>See multi-agent interaction</dt><dd>Watch independent speech models in 3D, with speaking and receiving activity, overlap, microphone levels and timing on one screen.</dd></div>
             <div><dt>Change what agents hear</dt><dd>Move participants, vary microphone noise, add divider attenuation and compare quiet, interruption and cocktail-party scenes.</dd></div>
             <div><dt>Inspect trajectories for RL research</dt><dd>Replay acoustic rollouts alongside audio, state, activity timelines and reward diagnostics; retain the evidence needed to develop model-side learning interfaces.</dd></div>
-            <div><dt>Run independent experiments</dt><dd>Use separate processes, ports, worker allocations and output folders for multiple sessions. Each viewer observes one experiment.</dd></div>
+            <div><dt>Run independent experiments</dt><dd>Use separate processes, ports, worker allocations and output folders for multiple sessions. Inspect an individual experiment or compare nine isolated paired conversations in one synchronized dashboard.</dd></div>
           </dl>
           <p class="side-note">Simulation supports early testing and controlled comparisons. Physical microphones, loudspeakers and room measurements remain important for deployment validation.</p>
         </section>
@@ -62,7 +62,13 @@
             <video controls playsinline preload="none" poster="assets/three-agents.jpg?v=pastel-20261012" aria-label="Three-way conversation between two PersonaPlex agents and Moshi"><source src="assets/three-agents.mp4?v=pastel-20261012" type="video/mp4">Your browser does not support embedded video. <a href="assets/three-agents.mp4?v=pastel-20261012">Download the conversation.</a></video>
             <figcaption><span class="figure-number">Figure 3.</span> Three independent agents listen and speak in one room, including overlapping speech. The participants use two model families, with distinct voices for the two PersonaPlex instances.</figcaption>
           </figure>
-          <p class="provenance">These are selected excerpts from actual model runs. Video audio mixes the agents’ emissions; speech bubbles replay offline ASR at word timestamps. Each agent’s spatially mixed receiver audio is saved separately. The clips illustrate interaction, not a conversation-quality benchmark.</p>
+          <figure class="conversation" id="nine-rooms">
+            <div class="figure-heading"><h3>Nine rooms, one timeline</h3><span>Moshi · PersonaPlex · Raon</span></div>
+            <p class="side-note">All nine rooms passed routing and buffer-health checks. ASR review found substantial problems in Raon’s output in both Moshi pairings; speech quality remains unresolved. <a href="https://github.com/KyuDan1/MuDuSi/blob/main/docs/MATRIX_RESULTS.md">Measured results and limitations.</a></p>
+            <video controls playsinline preload="none" poster="assets/nine-rooms.jpg" aria-label="Nine isolated paired conversations among Moshi, PersonaPlex and Raon"><source src="assets/nine-rooms.mp4" type="video/mp4">Your browser does not support embedded video. <a href="assets/nine-rooms.mp4">Download the nine-room presentation.</a></video>
+            <figcaption><span class="figure-number">Figure 4.</span> The nine ordered model pairs use 18 independent real-model workers, two per isolated room. Rows identify the left model and columns the right model. The soundtrack follows one selected room at a time on the common recording timeline; rooms never hear one another. Captions use offline, word-timed ASR. This configuration places the workers on four GPUs (5 / 5 / 4 / 4), collecting audio at 0.25× pacing and replaying it at normal speed. It is not a real-time inference demonstration. <a href="https://github.com/KyuDan1/MuDuSi/blob/main/docs/MATRIX.md">Nine-room setup and verification.</a> <a href="assets/nine-rooms.json">Recording and video provenance (JSON).</a></figcaption>
+          </figure>
+          <p class="provenance">The completed clips contain actual model-generated speech. Video audio mixes the agents’ emissions within the selected room; speech bubbles replay offline ASR at word timestamps. Each agent’s spatially mixed receiver audio is saved separately. The clips illustrate interaction, not a conversation-quality benchmark.</p>
         </section>
 
         <section id="simulation" aria-labelledby="simulation-heading">
@@ -105,6 +111,10 @@
           <pre><code>mudusi serve \
   --replay runs/conversation --port 18766</code></pre>
           <p>Open <code>http://localhost:18766/?showcase</code> for the presentation view. Word-timed speech bubbles require the optional offline ASR step. On the shared GPU cluster, launch model inference through the supplied Slurm scripts.</p>
+          <div class="code-label">Replay a completed nine-room matrix on CPU</div>
+          <pre><code>mudusi serve \
+  --matrix runs/matrix-four-gpu --port 18767</code></pre>
+          <p>Open <code>http://localhost:18767/?matrix</code> to compare all nine rooms and select which conversation to hear. See the <a href="https://github.com/KyuDan1/MuDuSi/blob/main/docs/MATRIX.md">matrix guide</a> for worker allocation, recording checks, ASR and video export.</p>
           <div class="reading-links"><a href="https://github.com/KyuDan1/MuDuSi">Installation &amp; examples <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi/blob/main/docs/SHOWCASE.md">Recording &amp; rendering <span aria-hidden="true">↗</span></a><a href="paper/">Read the technical report <span aria-hidden="true">↗</span></a></div>
         </section>
         <section id="paper" aria-labelledby="paper-heading">

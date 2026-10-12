@@ -46,7 +46,7 @@ mudusi serve --scenario cocktail --port 8766
 
 For concurrent real-model experiments, allocate separate worker sessions/endpoints, adequate GPU resources, and distinct recording directories. The native reference servers serialize sessions, so reusing one endpoint does not create independent concurrent agents.
 
-The [nine-room matrix runner](docs/MATRIX.md) runs all ordered pairs of Moshi, PersonaPlex, and Raon with 18 independent model processes. Its example shares each GPU among three models and synchronizes the nine acoustic engines with one start barrier. Replay the recordings in a 3×3 dashboard with face-to-face agents, a common clock, captions, and selectable room audio. This bounded inference runner does not implement a vectorized RL training scheduler.
+The [nine-room matrix runner](docs/MATRIX.md) runs all ordered pairs of Moshi, PersonaPlex, and Raon with 18 independent model processes. Its measured four-GPU configuration synchronizes nine independent acoustic engines with one start barrier. Replay the recordings in a 3×3 dashboard with face-to-face agents, a common clock, captions, and selectable room audio. This bounded inference runner does not implement a vectorized RL training scheduler. The [four-GPU results](docs/MATRIX_RESULTS.md) verify all eighteen agents emitting audio with correct routing and no sustained underruns at 0.25× collection speed (60 audio seconds in about 240 wall seconds), rather than real-time throughput.
 
 ### See what an RL policy experienced
 

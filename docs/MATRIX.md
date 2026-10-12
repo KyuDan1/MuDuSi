@@ -10,7 +10,7 @@ The matrix experiment runs every ordered pair of Moshi, PersonaPlex, and Raon co
 
 There are **nine acoustic engines and eighteen model processes**, with distinct endpoints, adapters, and model state. Every room has two active model slots (`persona` = left, `moshi` = right); `custom` is muted. These slot names do not determine the backend. No room sends audio to another room, and no prerecorded stimulus is inserted.
 
-This document describes the runner and verification procedure. The example uses **0.5× wall-clock pacing** to give colocated models more compute time. Successful GPU inference and usable conversations must be established from the recorded run; this setting is **not a real-time throughput benchmark**.
+Use the **measured four-GPU configuration** below to reproduce the verified collection setup. All nine rooms completed with eighteen emitting agents, correct receiver-to-input routing, and no sustained underruns at **0.25× pacing**. See [measured results and limitations](MATRIX_RESULTS.md). This is **not a real-time throughput benchmark** or a conversation-quality score.
 
 ## Prepare and submit
 
@@ -26,50 +26,53 @@ export RAON_SOURCE=/path/to/Raon-Speech
 export RAON_BUNDLE=/path/to/Raon-SpeechChat-9B-sglang
 ```
 
-Review the configuration and inspect the plan without launching models:
+## Measured four-GPU configuration
+
+`configs/matrix.four-gpu.json` runs all nine ordered rooms and eighteen independent model processes on four job-local GPUs. GPUs 0–3 hold **5, 5, 4, and 4 processes**, respectively. The family totals are six Moshi, six PersonaPlex, and six Raon instances. Every participant retains its own endpoint and model state.
+
+Inspect the plan without loading models:
 
 ```bash
 .venv/bin/python -m workers.run_matrix \
-  --config configs/matrix.example.json --output runs/matrix-run --plan
+  --config configs/matrix.four-gpu.json --output runs/matrix-run --plan
 ```
 
-The example allocates one worker of each family to each of six job-local GPUs. It uses ports 18000–18017, starts models in batches of four, and defaults to 60 simulation seconds per room at `playback_rate: 0.5` (120 wall-clock seconds after readiness). Raon uses a static memory fraction of 0.30, with speak-first conditioning on the left and listen-first conditioning on the right. `raon.mimi_sdpa_window: true` explicitly enables the optional Mimi SDPA window bridge; it is not silently applied to other launchers. Inspect its startup log and validate generated audio when using this compatibility path.
+For the shared cluster's `sub` account, override the batch defaults to use the protected four-GPU `own` quota:
 
 ```bash
 mkdir -p runs
 export MUDUSI_ENV_FILE="$PWD/work/server.env"
-sbatch workers/matrix.sbatch \
-  --config configs/matrix.example.json --output runs/matrix-run
-```
-
-The batch requests **6 GPUs, 48 CPUs, 512 GiB RAM, and 35 minutes**, using `extra` QOS. On this cluster `extra` is preemptible, including by eligible `own` jobs; a cancelled matrix is an incomplete experiment. Use a fresh output directory to rerun. `--seconds 45` can override the simulation/audio duration (90 wall-clock seconds at 0.5×). `--playback-rate 1` selects real-time input pacing when explicitly testing that setting. GPU assignments are explicit in the configuration; `--gpus` only changes the expected allocation size and does not redistribute workers.
-
-The runner checks ports before launching, waits for all surviving rooms' adapter readiness, then releases an in-process start barrier. Startup conditioning may produce audio before release; evaluation summaries preserve the startup counters. A room that fails readiness does not strand the others. The overall exit status is nonzero unless all nine rooms finish. Startup/cleanup are bounded, and cancellation terminates the runner's own worker process groups. There is no worker attach, external control channel, or NAS-based live coordination.
-
-## Protected four-GPU alternative
-
-When the six-GPU `extra` allocation cannot start, `configs/matrix.four-gpu.json` keeps all nine ordered rooms and eighteen independent model processes within a four-GPU allocation. GPUs 0–3 hold **5, 5, 4, and 4 processes**, respectively. Model-family totals remain six Moshi, six PersonaPlex, and six Raon instances; each room still owns its two distinct endpoints and model states.
-
-For a `sub` account, explicitly override the batch defaults to use the protected four-GPU `own` quota:
-
-```bash
-export MUDUSI_ENV_FILE="$PWD/work/server.env"
 sbatch --qos=own --gres=gpu:4 --cpus-per-gpu=12 --mem=512G \
   workers/matrix.sbatch --config configs/matrix.four-gpu.json \
-  --output runs/matrix-four-gpu
+  --output runs/matrix-run
 ```
 
-This requests 48 CPUs in total and retains the script's 35-minute limit. Availability within the user's own quota still determines when it starts. Cancelling a pending `extra` submission to choose this configuration is a scheduling change, not a failed inference experiment.
+This requests **4 GPUs, 48 CPUs, 512 GiB RAM, and 35 minutes**. The configuration uses ports 18000–18017, startup batches of four, and **0.25× pacing**: 60 simulation/audio seconds take approximately **240 wall-clock seconds** after readiness. The measured run is job 190030; its GPU/timing/buffer results are documented [separately](MATRIX_RESULTS.md). Availability within the user's own quota still determines when a new submission starts.
 
-The four-GPU configuration uses **0.25× pacing**: 60 simulation/audio seconds require approximately **240 wall-clock seconds**, excluding model startup and cleanup. All nine conversations remain concurrent. Normal 24 kHz PCM and replay speed are unchanged; this run must not be reported as real-time inference.
+Raon uses `max_total_tokens=8192`, `max_running_requests=4`, and `max_allocated_req_pool_indices=4`, with `mem_fraction_static=0.85`. The fraction participates in the available-memory budget calculation; the explicit token cap means each process does **not** allocate 85% of the GPU. For a bounded 60-second rollout, the expected generated-token budget is at most 2,250 positions plus conditioning. The estimated capped KV cache is approximately **1.125 GiB per Raon process**, distinct from weights, codecs, and workspaces. Actual combined memory was measured in the [results](MATRIX_RESULTS.md#four-gpu-memory-and-utilization); do not use the KV estimate as total VRAM demand.
 
-Raon's explicit limits are `max_total_tokens=8192`, `max_running_requests=4`, and `max_allocated_req_pool_indices=4`, alongside `mem_fraction_static=0.85`. The fraction participates in the runtime's available-memory budget calculation; with the explicit token cap it does **not** mean each process allocates 85% of the GPU. For this bounded 60-second rollout, the expected generated-token budget is at most 2,250 positions plus prompt conditioning, within the 8,192-position cap. The estimated KV cache at that cap is approximately **1.125 GiB per Raon process**, separate from weights, codec, runtime workspaces, and other allocations. Total VRAM consumption and pacing under the denser placement still require measurement; these settings alone are not proof that the workload fits or produces healthy audio.
+Left Raon instances use speak-first conditioning; right instances use listen-first conditioning. `raon.mimi_sdpa_window: true` explicitly enables the Mimi SDPA window bridge in the parent and spawned decoder. Check each decoder-child startup message; the flag alone is not evidence of successful propagation.
+
+The runner checks ports, waits for surviving rooms' adapters, and releases one in-process start barrier. It records pre/post-barrier counters so startup output is visible. A failed room does not strand other rooms; overall success requires all nine to finish. Startup and cleanup are bounded, and cancellation terminates the runner's owned worker process groups. NAS files are output artifacts, not a live control channel.
+
+## Other allocation and pacing choices
+
+`configs/matrix.example.json` retains the **six-GPU, three-models-per-GPU, 0.5×** option. It targets 120 wall-clock seconds for 60 simulation seconds and uses Raon's static memory fraction 0.30. Submit with the unmodified batch defaults:
+
+```bash
+sbatch workers/matrix.sbatch \
+  --config configs/matrix.example.json --output runs/matrix-six-gpu
+```
+
+This requests **6 GPUs, 48 CPUs, 512 GiB RAM, and 35 minutes** with preemptible `extra` QOS. Eligible `own` jobs can preempt it. A pending submission cancelled to change allocation is a scheduling event, not a failed inference run. This six-GPU 0.5× configuration has no completed measured run in the results; the earlier six-GPU baseline ran at **1×** and had sustained Raon underruns.
+
+Always use a new output directory. `--seconds` changes simulation/audio duration; `--playback-rate` changes input pacing. GPU assignments remain explicit in the configuration: `--gpus` only changes the expected allocation size and does not redistribute workers. Revised settings require fresh validation.
 
 ## Simulation time versus wall-clock pacing
 
-`playback_rate` is simulation seconds per wall-clock second and must be in `(0, 1]`. With the example's rate of 0.5, a 60-second, 750-frame conversation runs for about 120 wall-clock seconds, excluding startup and cleanup. All nine rooms still run concurrently behind the same readiness barrier. Model instances, room separation, and the three-models-per-GPU placement remain unchanged.
+`playback_rate` is simulation seconds per wall-clock second and must be in `(0, 1]`. At the measured rate of 0.25, a 60-second, 750-frame conversation runs for about 240 wall-clock seconds, excluding startup and cleanup. At 0.5 it takes about 120 seconds. All nine rooms run concurrently behind the same readiness barrier; pacing does not merge model sessions or acoustic rooms.
 
-The audio format stays **24 kHz mono**, with **1,920 samples per 80 ms simulation tick**. Slower input pacing does not resample audio, stretch voices, or add a silence block between recorded frames. Replay and exported videos use the normal audio/simulation timeline. A 60-second video therefore presents 60 seconds of generated audio, while the inference job took about 120 seconds to collect it. Keep that distinction visible in published timing claims.
+The audio format stays **24 kHz mono**, with **1,920 samples per 80 ms simulation tick**. Slower input pacing does not resample audio, stretch voices, or add a silence block between recorded frames. Replay and exported videos use the normal audio/simulation timeline. A 60-second video therefore presents 60 seconds of generated audio, while the measured inference job took about 240 seconds to collect it. Keep that distinction visible in published timing claims.
 
 The manifest and `matrix.json` record `playback_rate`, `simulation_seconds`/`seconds`, and `target_wall_seconds`; room summaries record actual wall time. At 0.5×, a wall/audio ratio near 2 is intentional. The four-GPU configuration instead targets a wall/audio ratio near 4. Compare startup and sustained buffer counters separately and review the resulting audio: relaxed pacing alone does not establish good dialogue or remove every underrun.
 
@@ -137,3 +140,27 @@ sbatch workers/render_matrix.sbatch --matrix runs/matrix-run \
 ```
 
 The default soundtrack moves its focus among rooms every six seconds while all rooms retain their original recording time. To keep the soundtrack on one room, add `--audio-room moshi-personaplex`. This selects an existing recording; it does not rerun, combine, or reorder the inference experiments. Inspect the resulting video and provenance sidecar before publishing it.
+
+### Audio-focus order
+
+`--focus-order` changes the order of audio spotlighting, not the grid layout, inference order, or recording timestamps. Supply a comma-separated permutation containing **each of the nine room IDs exactly once**. The default is row-major order (Moshi row, PersonaPlex row, then Raon row). For example, put the three same-family pairs first:
+
+```bash
+sbatch workers/render_matrix.sbatch --matrix runs/matrix-run \
+  --output output/mudusi-nine-rooms.mp4 --start 0 --seconds 60 --fps 24 \
+  --focus-seconds 6 \
+  --focus-order moshi-moshi,personaplex-personaplex,raon-raon,moshi-personaplex,personaplex-moshi,moshi-raon,raon-moshi,personaplex-raon,raon-personaplex
+```
+
+Focus is selected from the **absolute simulation/audio time**: with six-second windows, room 1 plays at 0–6 seconds, room 2 at 6–12 seconds, and so on, cycling after 54 seconds. A nonzero `--start` enters the corresponding existing window rather than restarting the focus order. Every selected room is heard at that same time in its own recording; no conversations are concatenated or time-shifted. Boundary ramps prevent clicks without mixing independent rooms. `--audio-room ROOM_ID` overrides cycling with a fixed room. The output sidecar records the focus settings.
+
+To reproduce the 54-second overview selected for job 190043 from the measured four-GPU recording:
+
+```bash
+sbatch workers/render_matrix.sbatch --matrix runs/matrix-nine-four-gpu-20261012 \
+  --output output/mudusi-nine-rooms-overview.mp4 --start 0 --seconds 54 --fps 24 \
+  --focus-seconds 6 \
+  --focus-order moshi-raon,moshi-personaplex,raon-moshi,personaplex-moshi,raon-raon,moshi-moshi,raon-personaplex,personaplex-raon,personaplex-personaplex
+```
+
+Each room receives one six-second audio spotlight at its original common time. This presentation includes operationally healthy recordings with differing speech quality; consult the [ASR-based review](MATRIX_RESULTS.md#asr-based-review-and-unresolved-speech-quality) rather than treating the grid as nine dialogue-quality passes. Validate the rendered audio/video before publication.

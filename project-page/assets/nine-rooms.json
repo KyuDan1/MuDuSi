@@ -1,0 +1,96 @@
+{
+  "recording": "runs/matrix-nine-four-gpu-20261012",
+  "start": 0,
+  "seconds": 54,
+  "fps": 24,
+  "frames": 1296,
+  "width": 1920,
+  "height": 1080,
+  "rooms": [
+    {
+      "id": "moshi-moshi",
+      "left": "Moshi",
+      "right": "Moshi"
+    },
+    {
+      "id": "moshi-personaplex",
+      "left": "Moshi",
+      "right": "PersonaPlex"
+    },
+    {
+      "id": "moshi-raon",
+      "left": "Moshi",
+      "right": "Raon"
+    },
+    {
+      "id": "personaplex-moshi",
+      "left": "PersonaPlex",
+      "right": "Moshi"
+    },
+    {
+      "id": "personaplex-personaplex",
+      "left": "PersonaPlex",
+      "right": "PersonaPlex"
+    },
+    {
+      "id": "personaplex-raon",
+      "left": "PersonaPlex",
+      "right": "Raon"
+    },
+    {
+      "id": "raon-moshi",
+      "left": "Raon",
+      "right": "Moshi"
+    },
+    {
+      "id": "raon-personaplex",
+      "left": "Raon",
+      "right": "PersonaPlex"
+    },
+    {
+      "id": "raon-raon",
+      "left": "Raon",
+      "right": "Raon"
+    }
+  ],
+  "focus_seconds": 6,
+  "focus_order": [
+    "moshi-raon",
+    "moshi-personaplex",
+    "raon-moshi",
+    "personaplex-moshi",
+    "raon-raon",
+    "moshi-moshi",
+    "raon-personaplex",
+    "personaplex-raon",
+    "personaplex-personaplex"
+  ],
+  "fixed_audio_room": null,
+  "audio": "one focused room at original timestamp; no cross-room mixing",
+  "mastering": "loudnorm -18 LUFS / -1.5 dBTP",
+  "captions": "offline word-timed emitted-audio ASR",
+  "browser_errors": [],
+  "job_id": "190043",
+  "file": "nine-rooms.mp4",
+  "decoded_frames": 1296,
+  "bytes": 7777783,
+  "sha256": "abe05062d5d143effe876710391394d4c995a0964741f0d1c9180555530cca0b",
+  "collection_playback_rate": 0.25,
+  "inference_job_id": "190030",
+  "visual_theme": "MuDuSi Pastel (configs/visual-theme.json)",
+  "audio_provenance": "Actual model emissions; selected-room audio at the common simulation timestamp, loudness mastered and AAC encoded",
+  "inference_source_commit": "29bfd751d2530925f1b146029a9dba9a1b590c52",
+  "verification": {
+    "structural_pass": true,
+    "audio_health_pass": true,
+    "all_eighteen_agents_emitted_audio": true,
+    "simultaneity": {
+      "start_spread_ms": 9.63592529296875,
+      "common_wall_interval_seconds": 240.0042953491211,
+      "common_start_epoch": 1791829082.7295487,
+      "common_end_epoch": 1791829322.733844,
+      "starts_within_one_80ms_tick": true
+    }
+  },
+  "quality_limitations": "Transport health is not speech-quality acceptance. Raon speech in both Moshi\u2013Raon ordered pairings remains substantially unclear in emitted and received ASR. Native generated text is not substituted for ASR."
+}

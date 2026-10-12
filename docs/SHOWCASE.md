@@ -122,3 +122,59 @@ sbatch workers/package_video.sbatch --output output/duplex-arena-introduction.mp
 ```
 
 The package sidecar records the input clips and full-stream decode results.
+
+## Cafe role-play and chaptered introduction
+
+`configs/cafe.example.json` gives two independent PersonaPlex workers the roles
+of Mia (cafe clerk) and Ben (customer). They receive role/menu context, not a
+prewritten dialogue. Both workers use the PersonaPlex environment, separate
+processes and separate GPUs; the `moshi` slot ID does not determine its backend.
+
+```bash
+sbatch --gres=gpu:2 --mem=96G workers/conversation.sbatch \
+  --models configs/cafe.example.json \
+  --configuration configs/two-agent-stage.example.json \
+  --seconds 60 --output runs/cafe-customer
+# After inference completes:
+sbatch workers/asr_gpu.sbatch runs/cafe-customer
+# Choose a coherent interval after checking its ASR and audio:
+sbatch --cpus-per-task=16 workers/render.sbatch \
+  --recording runs/cafe-customer --output output/duplex-arena-cafe.mp4 \
+  --start 9.5 --seconds 20.75 --fps 24 \
+  --title 'At the coffee shop.' --subtitle 'CAFE CLERK + CUSTOMER / PERSONAPLEX'
+```
+
+The renderer accepts optional `--title` and `--subtitle`; interactive replay uses
+matching URL query parameters. Captions remain emitted-audio ASR.
+
+`workers/title_cards.cjs CARDS.json FONT.woff2 OUTPUT_DIR` creates typographic
+1280×720 chapter PNGs with Playwright. The font must include the chosen text's
+characters. `configs/film-cards.example.json` contains the four showcase cards;
+`configs/film.example.json` defines their complete sequence. Each card has `file`, `eyebrow`, `title`, `subtitle`, `number` (`00`–`03`),
+`count` (2 or 3), and a CSS `accent` color. No external assets are fetched.
+
+`workers/edit_film.py` composes cards and compatible 24 fps 1280×720 clips. A
+manifest lists `segments` of `{"kind":"card","path":"...png","seconds":3}` or
+`{"kind":"video","path":"...mp4"}`, with optional `fps` (24) and `transition`
+(0.5 seconds). Video durations come from actual decoded frame counts.
+
+```bash
+sbatch workers/edit_film.sbatch --manifest configs/film.example.json \
+  --output output/duplex-arena-introduction-v2.mp4
+```
+
+The intended sequence is title → friends chapter → friends conversation →
+clerk/customer chapter → cafe conversation → three-agent chapter → three-agent
+conversation. Each clip receives a half-second frozen frame and silent padding
+on both ends. Crossfades happen in that padding, so the selected spoken content
+and its caption timing are preserved. The movie starts and ends with a fade.
+The output JSON records chapter times, exact spoken intervals and decode checks.
+
+The cafe recording (`runs/cafe-customer`, GPU job 189891) completed 60 seconds
+with two B200 GPUs, zero dropped audio/input overflow/clipping, one startup
+underrun per worker, and 1.69 ms p95 scheduler lateness. Both model input WAVs
+exactly matched their previous receiver block. The selected 9.50–30.25 s passage
+contains an iced oat-latte and croissant order followed by order confirmation.
+The full recording includes an initial customer/clerk role confusion and an
+incorrect total price; those passages are outside the showcase selection.
+This is a selected example, not evidence of reliable role adherence or arithmetic.

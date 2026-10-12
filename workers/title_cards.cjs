@@ -1,0 +1,90 @@
+/* Render local, typographic chapter cards without external assets or services. */
+const fs = require("node:fs");
+const path = require("node:path");
+const { chromium } = require(
+  path.resolve(
+    process.env.ARENA_PLAYWRIGHT || "work/browser/node_modules/playwright",
+  ),
+);
+const [config, fontPath, outputDirectory] = process.argv.slice(2);
+if (!config || !fontPath || !outputDirectory)
+  throw Error(
+    "Usage: node workers/title_cards.cjs CARDS.json FONT.woff2 OUTPUT_DIR",
+  );
+const escape = (s) =>
+  String(s).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+(async () => {
+  const font = fs.readFileSync(fontPath).toString("base64");
+  const cards = JSON.parse(fs.readFileSync(config, "utf8"));
+  fs.mkdirSync(outputDirectory, { recursive: true });
+  const browser = await chromium.launch({
+    executablePath:
+      process.env.ARENA_CHROMIUM ||
+      path.resolve(
+        "work/playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell",
+      ),
+    args: ["--no-sandbox"],
+  });
+  try {
+    const page = await browser.newPage({
+      viewport: { width: 1280, height: 720 },
+      deviceScaleFactor: 1,
+    });
+    for (const card of cards) {
+      const colors = ["#c7f36b", "#b6a0f8", "#f4ba73"];
+      const points =
+        card.count === 2
+          ? [
+              [955, 275],
+              [1055, 425],
+            ]
+          : [
+              [910, 280],
+              [1095, 310],
+              [995, 470],
+            ];
+      const graphic = points
+        .map(
+          ([x, y], i) =>
+            `<circle cx="${x}" cy="${y}" r="${90 + i * 8}" fill="none" stroke="${colors[i]}" stroke-opacity=".12"/><circle cx="${x}" cy="${y}" r="42" fill="${colors[i]}" fill-opacity=".07" stroke="${colors[i]}" stroke-opacity=".7"/><circle cx="${x}" cy="${y}" r="7" fill="${colors[i]}"/>`,
+        )
+        .join("");
+      const lines = points
+        .slice(1)
+        .map(
+          ([x, y]) =>
+            `<path d="M${points[0][0]},${points[0][1]} L${x},${y}" stroke="#9cb1a6" stroke-opacity=".35" stroke-dasharray="3 6"/>`,
+        )
+        .join("");
+      await page.setContent(`<!doctype html><style>
+      @font-face{font-family:Film;src:url(data:font/woff2;base64,${font})}*{box-sizing:border-box}body{margin:0;background:#11171b;color:#e7eee9;font-family:Film,sans-serif;width:1280px;height:720px;overflow:hidden}.bg{position:absolute;inset:0;background:radial-gradient(ellipse at 85% 45%,#24382e80,transparent 50%)}svg{position:absolute;inset:0}.rule{position:absolute;left:70px;right:70px;top:85px;height:1px;background:#35483b}.brand{position:absolute;left:70px;top:44px;font-size:13px;letter-spacing:4px;color:#a7bead}.stamp{position:absolute;right:70px;top:45px;color:#7f9889;font-size:11px;letter-spacing:2px}.content{position:absolute;top:216px;left:70px;width:850px}.eyebrow{font-size:15px;letter-spacing:3px;color:${escape(card.accent)}}h1{font-size:57px;letter-spacing:-2px;line-height:1.25;margin:25px 0 24px;font-weight:400}.subtitle{font-size:18px;color:#9db0a4;letter-spacing:.1px}.accent{height:3px;width:64px;background:${escape(card.accent)};margin-top:40px}.chapters{position:absolute;left:70px;right:70px;bottom:79px;display:flex;gap:48px;border-top:1px solid #33443b;padding-top:27px}.chapter{color:#728b7e;font-size:12px;letter-spacing:1px}.chapter.active{color:${escape(card.accent)}}.chapter b{font-size:16px;margin-right:12px;font-weight:400}.foot{position:absolute;left:70px;bottom:32px;color:#637d6e;font-size:10px;letter-spacing:1.5px}
+      </style><div class="bg"></div><svg width="1280" height="720">${lines}${graphic}</svg><div class="brand">DUPLEX ARENA</div><div class="stamp">REAL MODEL CONVERSATIONS</div><div class="rule"></div><div class="content"><div class="eyebrow">${escape(card.eyebrow)}</div><h1>${escape(card.title)}</h1><div class="subtitle">${escape(card.subtitle)}</div><div class="accent"></div></div><div class="chapters">${[
+        ["01", "FRIENDS"],
+        ["02", "CLERK + CUSTOMER"],
+        ["03", "THREE AGENTS"],
+      ]
+        .map(
+          ([n, label]) =>
+            `<div class="chapter ${card.number === n ? "active" : ""}"><b>${n}</b>${label}</div>`,
+        )
+        .join(
+          "",
+        )}</div><div class="foot">ACTUAL GENERATED AUDIO / WORD-TIMED ASR REPLAY</div>`);
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({
+        path: path.join(outputDirectory, path.basename(card.file)),
+      });
+    }
+  } finally {
+    await browser.close();
+  }
+})().catch((e) => {
+  console.error(e);
+  process.exitCode = 1;
+});

@@ -118,14 +118,16 @@ export default function Showcase() {
             DUPLEX ARENA / REAL MODEL RECORDING
           </div>
           <h1>
-            {state.agents.length === 2
-              ? "Two voices. A shared conversation."
-              : "Three voices. One shared space."}
+            {params.get("title") ||
+              (state.agents.length === 2
+                ? "Two voices. A shared conversation."
+                : "Three voices. One shared space.")}
           </h1>
           <p>
-            {state.agents.length === 2
-              ? "두 에이전트의 대화"
-              : "세 에이전트의 대화"}{" "}
+            {params.get("subtitle") ||
+              (state.agents.length === 2
+                ? "두 에이전트의 대화"
+                : "세 에이전트의 대화")}{" "}
             <span>Listen · speak · overlap</span>
           </p>
         </div>

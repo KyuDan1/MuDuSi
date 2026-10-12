@@ -1,0 +1,33 @@
+{
+  "noise_db": -72,
+  "reverb": 0.06,
+  "agents": [
+    {
+      "id": "persona",
+      "position": [
+        -1.25,
+        1.2,
+        0
+      ],
+      "muted": false
+    },
+    {
+      "id": "moshi",
+      "position": [
+        1.25,
+        1.2,
+        0
+      ],
+      "muted": false
+    },
+    {
+      "id": "custom",
+      "position": [
+        0,
+        1.2,
+        2.1
+      ],
+      "muted": true
+    }
+  ]
+}

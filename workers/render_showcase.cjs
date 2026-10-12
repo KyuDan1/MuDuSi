@@ -97,10 +97,16 @@ async function main() {
   });
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
-  await page.goto(`${origin}/?showcase&capture`);
+  const viewParams = new URLSearchParams({ showcase: "", capture: "" });
+  for (const key of ["title", "subtitle"])
+    if (options[key]) viewParams.set(key, options[key]);
+  await page.goto(`${origin}/?${viewParams}`);
   await page.waitForFunction(() => window.arenaReady);
   await page.evaluate(() => document.fonts.ready);
-  await page.waitForFunction(n => document.querySelectorAll(".world-label").length === n, data.participants.length);
+  await page.waitForFunction(
+    (n) => document.querySelectorAll(".world-label").length === n,
+    data.participants.length,
+  );
   await page.waitForTimeout(1000);
   if (await page.locator(".fallback-stage").count())
     throw new Error("3D renderer fell back to 2D");
@@ -175,6 +181,8 @@ async function main() {
     JSON.stringify(
       {
         recording: options.recording,
+        title: options.title,
+        subtitle: options.subtitle,
         start,
         seconds,
         fps,

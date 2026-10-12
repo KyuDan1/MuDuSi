@@ -1,0 +1,38 @@
+{
+  "fps": 24,
+  "transition": 0.5,
+  "segments": [
+    {
+      "kind": "card",
+      "path": "output/film-cards/intro.png",
+      "seconds": 4
+    },
+    {
+      "kind": "card",
+      "path": "output/film-cards/friends.png",
+      "seconds": 3
+    },
+    {
+      "kind": "video",
+      "path": "output/duplex-arena-two-agents.mp4"
+    },
+    {
+      "kind": "card",
+      "path": "output/film-cards/cafe.png",
+      "seconds": 3
+    },
+    {
+      "kind": "video",
+      "path": "output/duplex-arena-cafe.mp4"
+    },
+    {
+      "kind": "card",
+      "path": "output/film-cards/three.png",
+      "seconds": 3
+    },
+    {
+      "kind": "video",
+      "path": "output/duplex-arena-three-agents.mp4"
+    }
+  ]
+}

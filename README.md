@@ -125,3 +125,9 @@ value estimate, policy-version synchronization을 모델 학습 코드에서 추
 - [Kyutai Moshi](https://github.com/kyutai-labs/moshi)
 
 프로젝트 이름과 캐릭터 라벨은 연결 대상 식별용이며 각 모델 제공자와의 제휴를 의미하지 않습니다.
+
+### Conversation videos
+
+The `?showcase` replay view adds a slowly rotating 3D camera, word-timed ASR speech
+bubbles, activity timelines and timing/level overlays. See [Showcase guide](docs/SHOWCASE.md)
+for two/three-model batch runs, playback, and deterministic H.264/AAC video export.

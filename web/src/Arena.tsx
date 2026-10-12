@@ -21,18 +21,20 @@ function SoundWave({
   offset,
   active,
   running,
+  time,
 }: {
   color: string;
   offset: number;
   active: boolean;
   running: boolean;
+  time?: number;
 }) {
   const ref = useRef<THREE.Mesh>(null);
   const phase = useRef(offset);
   useFrame((_, delta) => {
     if (!ref.current) return;
     if (running) phase.current = (phase.current + delta * 0.32) % 1;
-    const p = phase.current;
+    const p = time === undefined ? phase.current : (offset + time * 0.32) % 1;
     ref.current.scale.setScalar(0.75 + p * 5.8);
     (ref.current.material as THREE.MeshBasicMaterial).opacity = active
       ? Math.pow(1 - p, 1.7) * 0.56
@@ -62,12 +64,18 @@ function Robot({
   onSelect,
   waves,
   running,
+  caption,
+  cinematic = false,
+  time,
 }: {
   agent: Agent;
   selected: boolean;
   onSelect: () => void;
   waves: boolean;
   running: boolean;
+  caption?: string;
+  cinematic?: boolean;
+  time?: number;
 }) {
   const robot = useRef<THREE.Group>(null);
   const color = colorOf(agent);
@@ -77,7 +85,7 @@ function Robot({
         agent.position[1] -
         1.2 +
         (agent.speaking && running
-          ? Math.sin(clock.elapsedTime * 8) * 0.055
+          ? Math.sin((time ?? clock.elapsedTime) * 8) * 0.055
           : 0);
   });
   return (
@@ -90,6 +98,7 @@ function Robot({
             color={color}
             active={agent.speaking && !agent.muted}
             running={running}
+            time={time}
           />
         ))}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
@@ -249,11 +258,31 @@ function Robot({
           <meshBasicMaterial color={color} />
         </mesh>
       </group>
+      {caption && (
+        <Html
+          zIndexRange={[30, 20]}
+          position={[
+            agent.id === "persona" ? -1.6 : agent.id === "moshi" ? 1.6 : 0,
+            agent.id === "custom" ? 2.9 : 3.6,
+            0,
+          ]}
+          center
+          style={{ pointerEvents: "none" }}
+        >
+          <div
+            className="showcase-bubble"
+            style={{ "--agent": color } as React.CSSProperties}
+          >
+            <small>{agent.name.toUpperCase()} · AUDIO ASR</small>
+            {caption}
+          </div>
+        </Html>
+      )}
       <Html
         zIndexRange={[10, 0]}
         position={[0, 2.25, 0]}
         center
-        distanceFactor={16}
+        distanceFactor={cinematic ? undefined : 16}
         style={{ pointerEvents: "none" }}
       >
         <div
@@ -340,6 +369,8 @@ function Scene({
   waves,
   links,
   cameraKey,
+  cinematic = false,
+  captions = {},
 }: {
   state: Snapshot;
   selected: string;
@@ -347,13 +378,23 @@ function Scene({
   waves: boolean;
   links: boolean;
   cameraKey: number;
+  cinematic?: boolean;
+  captions?: Record<string, string>;
 }) {
-  const { camera } = useThree();
+  const { camera, invalidate } = useThree();
+  useEffect(() => { if (cinematic) invalidate(); }, [cinematic, state.time, invalidate]);
   useEffect(() => {
     camera.position.set(10, 10.5, 13);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
   }, [camera, cameraKey]);
+  useFrame(() => {
+    if (cinematic) {
+      const angle = 0.12 + state.time * 0.007;
+      camera.position.set(Math.sin(angle) * 11, 6.7, Math.cos(angle) * 11);
+      camera.lookAt(0, 1, 0.7);
+    }
+  });
   const { width, depth } = state.room;
   const uniqueLinks = state.links.filter((link) => link.source < link.target);
   return (
@@ -366,7 +407,7 @@ function Scene({
         position={[4, 12, 6]}
         intensity={2.8}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={cinematic ? [512, 512] : [2048, 2048]}
         shadow-camera-left={-10}
         shadow-camera-right={10}
         shadow-camera-top={10}
@@ -474,21 +515,23 @@ function Scene({
                 transparent
                 opacity={0.55}
               />
-              <Html
-                zIndexRange={[10, 0]}
-                position={[
-                  (a.position[0] + b.position[0]) / 2,
-                  0.13,
-                  (a.position[2] + b.position[2]) / 2,
-                ]}
-                center
-                distanceFactor={22}
-              >
-                <span className="link-label">
-                  {link.distance.toFixed(1)} m · {link.delay_ms.toFixed(1)} ms
-                  {link.occluded ? " · OCCLUDED" : ""}
-                </span>
-              </Html>
+              {!cinematic && (
+                <Html
+                  zIndexRange={[10, 0]}
+                  position={[
+                    (a.position[0] + b.position[0]) / 2,
+                    0.13,
+                    (a.position[2] + b.position[2]) / 2,
+                  ]}
+                  center
+                  distanceFactor={22}
+                >
+                  <span className="link-label">
+                    {link.distance.toFixed(1)} m · {link.delay_ms.toFixed(1)} ms
+                    {link.occluded ? " · OCCLUDED" : ""}
+                  </span>
+                </Html>
+              )}
             </group>
           );
         })}
@@ -500,6 +543,9 @@ function Scene({
           onSelect={() => onSelect(agent.id)}
           waves={waves}
           running={state.running}
+          caption={captions[agent.id]}
+          cinematic={cinematic}
+          time={cinematic ? state.time : undefined}
         />
       ))}
       <ContactShadows
@@ -511,17 +557,19 @@ function Scene({
         resolution={256}
         frames={1}
       />
-      <OrbitControls
-        key={cameraKey}
-        makeDefault
-        minDistance={8}
-        maxDistance={28}
-        minPolarAngle={0.2}
-        maxPolarAngle={Math.PI / 2.2}
-        target={[0, 0, 0]}
-        enableDamping
-        dampingFactor={0.07}
-      />
+      {!cinematic && (
+        <OrbitControls
+          key={cameraKey}
+          makeDefault
+          minDistance={8}
+          maxDistance={28}
+          minPolarAngle={0.2}
+          maxPolarAngle={Math.PI / 2.2}
+          target={[0, 0, 0]}
+          enableDamping
+          dampingFactor={0.07}
+        />
+      )}
     </>
   );
 }
@@ -586,6 +634,8 @@ export default function Arena(props: {
   waves: boolean;
   links: boolean;
   cameraKey: number;
+  cinematic?: boolean;
+  captions?: Record<string, string>;
 }) {
   const hasGL = useMemo(() => {
     try {
@@ -609,9 +659,10 @@ export default function Arena(props: {
   return (
     <SceneBoundary fallback={fallback}>
       <Canvas
+        frameloop={props.cinematic ? "demand" : "always"}
         shadows
         camera={{ position: [10, 10.5, 13], fov: 42, near: 0.1, far: 80 }}
-        dpr={[1, 1.75]}
+        dpr={props.cinematic ? 1 : [1, 1.75]}
         gl={{ antialias: true, alpha: false }}
       >
         <Scene {...props} />

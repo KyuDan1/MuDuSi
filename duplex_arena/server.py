@@ -250,6 +250,25 @@ def create_app(seed=42, scenario="roundtable", models=None, asr=None, replay=Non
     app = FastAPI(title="Duplex Arena", version="0.1.0", lifespan=lifespan)
     app.state.session = session
 
+    presentation = None
+
+    def get_presentation():
+        nonlocal presentation
+        if not replay:
+            raise HTTPException(409, "Presentation requires --replay of a completed recording")
+        if presentation is None:
+            from .presentation import load_presentation
+            presentation = load_presentation(replay)
+        return presentation
+
+    @app.get("/api/presentation")
+    async def presentation_data():
+        return get_presentation()[0]
+
+    @app.get("/api/presentation/audio.wav")
+    async def presentation_audio():
+        return Response(get_presentation()[1], media_type="audio/wav")
+
     @app.get("/api/health")
     async def health():
         return {"status": "error" if session.error else "ok", "mode": "replay" if replay else "live" if models else "demo", "error": session.error}

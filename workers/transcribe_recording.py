@@ -29,9 +29,13 @@ def main():
         audio, sr = sf.read(path, dtype="float32")
         if sr != 24000 or audio.ndim != 1:
             raise ValueError("Expected mono 24 kHz recording")
+        if not np.any(np.abs(audio) > 1e-5):
+            results['files'][path.name] = {'text': '', 'segments': []}
+            (root / 'asr.json').write_text(json.dumps(results, indent=2, ensure_ascii=False) + '\n')
+            continue
         audio = resample_poly(audio, 2, 3).astype(np.float32)
         result = model.transcribe(audio, language="en", fp16=args.device != "cpu", temperature=0,
-                                  condition_on_previous_text=False)
+                                  condition_on_previous_text=False, word_timestamps=True)
         results["files"][path.name] = {"text": result["text"], "segments": result["segments"]}
         print(path.name, result["text"], flush=True)
         (root / "asr.json").write_text(json.dumps(results, indent=2, ensure_ascii=False) + "\n")

@@ -96,21 +96,35 @@ function Room({ room, time, focused, choose }: { room: MatrixRoom; time: number;
 }
 export default function MatrixShowcase() {
   const [data, setData] = useState<MatrixData>();
+  const [focusOrder, setFocusOrder] = useState<number[]>([]);
   const [time, setTime] = useState(0), [focus, setFocus] = useState(0), [playing, setPlaying] = useState(false), [error, setError] = useState("");
   const [audioSource, setAudioSource] = useState<{room: string; url: string}>();
   const audio = useRef<HTMLAudioElement>(null), clock = useRef({ start: 0, offset: 0 });
   const params = new URLSearchParams(location.search), capture = params.has("capture");
-  const focusSeconds = Math.max(.1, Number(params.get("focusSeconds") || 6));
-  useEffect(() => { fetch("/api/matrix").then(r => { if (!r.ok) throw new Error("Open recorded rooms with --matrix."); return r.json(); }).then(setData).catch(e => setError(String(e))); }, []);
+  const focusSeconds = Number(params.get("focusSeconds") || 6);
+  const focusOrderParameter = params.get("focusOrder");
+  useEffect(() => {
+    fetch("/api/matrix").then(r => { if (!r.ok) throw new Error("Open recorded rooms with --matrix."); return r.json(); })
+      .then((matrix: MatrixData) => {
+        if (!Number.isFinite(focusSeconds) || focusSeconds <= 0) throw new Error("focusSeconds must be a finite positive number.");
+        const ids = focusOrderParameter !== null
+          ? focusOrderParameter.split(",").map(id => id.trim())
+          : matrix.model_order.flatMap(left => matrix.model_order.map(right => matrix.rooms.find(room => room.left === left && room.right === right)?.id ?? ""));
+        if (matrix.rooms.length !== 9 || ids.length !== 9 || new Set(ids).size !== 9 || ids.some(id => !matrix.rooms.some(room => room.id === id)))
+          throw new Error("focusOrder must list each of the nine room IDs exactly once.");
+        const order = ids.map(id => matrix.rooms.findIndex(room => room.id === id));
+        setFocusOrder(order); setFocus(order[0]); setData(matrix);
+      }).catch(e => setError(String(e)));
+  }, [focusOrderParameter, focusSeconds]);
   useEffect(() => {
     if (!data) return;
     window.matrixSeek = async (t, selected) => {
-      flushSync(() => { setTime(Math.max(0, Math.min(t, data.duration - .001))); setFocus(selected ?? Math.floor(t / focusSeconds) % data.rooms.length); });
+      flushSync(() => { setTime(Math.max(0, Math.min(t, data.duration - .001))); setFocus(selected ?? focusOrder[Math.floor(Math.max(0, t) / focusSeconds) % focusOrder.length]); });
       await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     };
     window.matrixReady = true;
     return () => { window.matrixReady = false; delete window.matrixSeek; };
-  }, [data, focusSeconds]);
+  }, [data, focusSeconds, focusOrder]);
   useEffect(() => {
     if (!playing || !data) return;
     clock.current = { start: performance.now(), offset: time };

@@ -68,7 +68,13 @@ async function main() {
     throw new Error("Invalid clip bounds");
   const focusSeconds = Number(options["focus-seconds"] || 6);
   const fixedFocus = options["audio-room"] ? data.rooms.findIndex(r => r.id === options["audio-room"]) : -1;
-  if (!(focusSeconds > 0) || (options["audio-room"] && fixedFocus < 0)) throw new Error("Invalid audio focus");
+  if (!Number.isFinite(focusSeconds) || !(focusSeconds > 0) || (options["audio-room"] && fixedFocus < 0)) throw new Error("Invalid audio focus");
+  const focusOrder = options["focus-order"] !== undefined
+    ? options["focus-order"].split(",").map(id => id.trim())
+    : data.model_order.flatMap(left => data.model_order.map(right => data.rooms.find(room => room.left === left && room.right === right)?.id || ""));
+  if (data.rooms.length !== 9 || focusOrder.length !== 9 || new Set(focusOrder).size !== 9 || focusOrder.some(id => !data.rooms.some(room => room.id === id)))
+    throw new Error("--focus-order must list each of the nine room IDs exactly once");
+  const focusIndices = focusOrder.map(id => data.rooms.findIndex(room => room.id === id));
   const audioFile = `${output}.focus.wav`;
   const roomAudio = [];
   for (const room of data.rooms) {
@@ -82,7 +88,7 @@ async function main() {
   execFileSync(python, ["-c", `
 import sys,wave,json
 import numpy as np
-paths=json.loads(sys.argv[1]);duration=float(sys.argv[3]);focus=float(sys.argv[4]);fixed=int(sys.argv[5]);sr=24000
+paths=json.loads(sys.argv[1]);duration=float(sys.argv[3]);focus=float(sys.argv[4]);fixed=int(sys.argv[5]);order=json.loads(sys.argv[6]);sr=24000
 tracks=[]
 for path in paths:
  with wave.open(path) as w:
@@ -91,7 +97,7 @@ for path in paths:
 out=np.zeros(round(duration*sr),dtype='<i2')
 step=max(1,round(focus*sr))
 for lo in range(0,len(out),step):
- hi=min(len(out),lo+step);index=fixed if fixed>=0 else (lo//step)%len(tracks);source=tracks[index]
+ hi=min(len(out),lo+step);index=fixed if fixed>=0 else order[(lo//step)%len(order)];source=tracks[index]
  end=min(hi,len(source))
  if end>lo:out[lo:end]=source[lo:end]
  # 5 ms boundary ramps avoid clicks; no cross-room audio overlap.
@@ -101,7 +107,7 @@ for lo in range(0,len(out),step):
   if hi<len(out):out[hi-n:hi]=(out[hi-n:hi].astype(float)*np.linspace(1,0,n)).astype('<i2')
 with wave.open(sys.argv[2],'wb') as w:
  w.setparams((1,2,sr,0,'NONE','not compressed'));w.writeframes(out.tobytes())
-`, JSON.stringify(roomAudio), audioFile, String(data.duration), String(focusSeconds), String(fixedFocus)]);
+`, JSON.stringify(roomAudio), audioFile, String(data.duration), String(focusSeconds), String(fixedFocus), JSON.stringify(focusIndices)]);
   browser = await chromium.launch({
     headless: true,
     executablePath:
@@ -126,7 +132,7 @@ with wave.open(sys.argv[2],'wb') as w:
   });
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
-  const viewParams = new URLSearchParams({ matrix: "", capture: "", focusSeconds: String(focusSeconds) });
+  const viewParams = new URLSearchParams({ matrix: "", capture: "", focusSeconds: String(focusSeconds), focusOrder: focusOrder.join(",") });
   for (const key of ["title", "subtitle"])
     if (options[key]) viewParams.set(key, options[key]);
   await page.goto(`${origin}/?${viewParams}`);
@@ -220,6 +226,7 @@ with wave.open(sys.argv[2],'wb') as w:
         height: Number(options.height || 1080),
         rooms: data.rooms.map(r => ({id:r.id,left:r.left,right:r.right})),
         focus_seconds: focusSeconds,
+        focus_order: focusOrder,
         fixed_audio_room: options["audio-room"] || null,
         audio: "one focused room at original timestamp; no cross-room mixing",
         mastering: "loudnorm -18 LUFS / -1.5 dBTP",

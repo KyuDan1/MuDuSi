@@ -1,0 +1,8 @@
+services:
+  arena:
+    build: .
+    ports:
+      - "127.0.0.1:8765:8765"
+    restart: unless-stopped
+    # In Docker, worker URLs must use reachable service names or a host gateway.
+    # The default runs a CPU synthetic demo and requires no model downloads.

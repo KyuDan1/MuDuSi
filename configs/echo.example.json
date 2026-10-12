@@ -1,0 +1,7 @@
+{
+  "agents": [
+    {"id": "persona", "backend": "pcm", "url": "ws://127.0.0.1:9001/stream"},
+    {"id": "moshi", "backend": "pcm", "url": "ws://127.0.0.1:9001/stream"},
+    {"id": "custom", "backend": "pcm", "url": "ws://127.0.0.1:9001/stream"}
+  ]
+}

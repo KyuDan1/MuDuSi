@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "duplex-arena"
+version = "0.1.0"
+description = "A visual multi-agent acoustic environment for full-duplex speech research"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2,<3", "fastapi>=0.115,<1", "uvicorn[standard]>=0.34,<1", "websockets>=14,<17"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "httpx>=0.28,<1"]
+models = ["sphn>=0.2,<0.3"]
+asr = ["faster-whisper>=1.1,<2", "scipy>=1.13,<2"]
+
+[project.scripts]
+duplex-arena = "duplex_arena.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["duplex_arena*", "workers*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

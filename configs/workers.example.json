@@ -1,0 +1,23 @@
+{
+  "agents": [
+    {
+      "id": "persona",
+      "backend": "personaplex",
+      "url": "ws://127.0.0.1:8999/api/chat",
+      "voice_prompt": "NATF2.pt",
+      "text_prompt": "You enjoy having a good conversation. Your name is Alex. Have a discussion about robots learning to listen in a noisy room.",
+      "startup_timeout": 120
+    },
+    {
+      "id": "moshi",
+      "backend": "moshi",
+      "url": "ws://127.0.0.1:8998/api/chat",
+      "startup_timeout": 120
+    },
+    {
+      "id": "custom",
+      "backend": "pcm",
+      "url": "ws://127.0.0.1:9001/stream"
+    }
+  ]
+}

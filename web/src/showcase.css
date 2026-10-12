@@ -24,16 +24,11 @@
   justify-content: space-between;
   pointer-events: none;
 }
-.showcase-eyebrow {
-  font-size: 11px;
-  letter-spacing: 3px;
-  color: #b5cc9d;
-}
 .showcase h1 {
   font-size: clamp(25px, 3.2vw, 48px);
   font-weight: 550;
   letter-spacing: -1.8px;
-  margin: 14px 0 10px;
+  margin: 0 0 10px;
 }
 .showcase-header p {
   color: #cbd5cc;

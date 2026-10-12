@@ -4,35 +4,35 @@
   "segments": [
     {
       "kind": "card",
-      "path": "output/film-cards/intro.png",
+      "path": "output/film-cards-en/intro.png",
       "seconds": 4
     },
     {
       "kind": "card",
-      "path": "output/film-cards/friends.png",
+      "path": "output/film-cards-en/friends.png",
       "seconds": 3
     },
     {
       "kind": "video",
-      "path": "output/duplex-arena-two-agents.mp4"
+      "path": "output/duplex-arena-two-agents-en.mp4"
     },
     {
       "kind": "card",
-      "path": "output/film-cards/cafe.png",
+      "path": "output/film-cards-en/cafe.png",
       "seconds": 3
     },
     {
       "kind": "video",
-      "path": "output/duplex-arena-cafe.mp4"
+      "path": "output/duplex-arena-cafe-en.mp4"
     },
     {
       "kind": "card",
-      "path": "output/film-cards/three.png",
+      "path": "output/film-cards-en/three.png",
       "seconds": 3
     },
     {
       "kind": "video",
-      "path": "output/duplex-arena-three-agents.mp4"
+      "path": "output/duplex-arena-three-agents-en.mp4"
     }
   ]
 }

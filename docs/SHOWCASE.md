@@ -150,7 +150,7 @@ matching URL query parameters. Captions remain emitted-audio ASR.
 `workers/title_cards.cjs CARDS.json FONT.woff2 OUTPUT_DIR` creates typographic
 1280×720 chapter PNGs with Playwright. The font must include the chosen text's
 characters. `configs/film-cards.example.json` contains the four showcase cards;
-`configs/film.example.json` defines their complete sequence. Each card has `file`, `eyebrow`, `title`, `subtitle`, `number` (`00`–`03`),
+`configs/film.example.json` defines their complete sequence. Each card has `file`, `title`, `subtitle`, `number` (`00`–`03`),
 `count` (2 or 3), and a CSS `accent` color. No external assets are fetched.
 
 `workers/edit_film.py` composes cards and compatible 24 fps 1280×720 clips. A
@@ -160,7 +160,7 @@ manifest lists `segments` of `{"kind":"card","path":"...png","seconds":3}` or
 
 ```bash
 sbatch workers/edit_film.sbatch --manifest configs/film.example.json \
-  --output output/duplex-arena-introduction-v2.mp4
+  --output output/duplex-arena-introduction-en.mp4
 ```
 
 The intended sequence is title → friends chapter → friends conversation →
@@ -178,3 +178,34 @@ contains an iced oat-latte and croissant order followed by order confirmation.
 The full recording includes an initial customer/clerk role confusion and an
 incorrect total price; those passages are outside the showcase selection.
 This is a selected example, not evidence of reliable role adherence or arithmetic.
+
+The chapter cards and presentation defaults use English throughout. Top-of-screen
+brand stamps and small text above titles are omitted. The English film manifest
+uses `output/film-cards-en/` and the three `*-en.mp4` conversation exports.
+
+With the browser/font dependencies above installed, regenerate the English cards:
+
+```bash
+node workers/title_cards.cjs configs/film-cards.example.json \
+  web/src/fonts/ArenaSans.woff2 output/film-cards-en
+```
+
+Render the selected clips with the current UI before composing the film:
+
+```bash
+sbatch --cpus-per-task=16 workers/render.sbatch \
+  --recording runs/showcase-2 --output output/duplex-arena-two-agents-en.mp4 \
+  --start 0 --seconds 26.92 --fps 24 \
+  --title 'Two friends' --subtitle 'PersonaPlex + Moshi'
+sbatch --cpus-per-task=16 workers/render.sbatch \
+  --recording runs/cafe-customer --output output/duplex-arena-cafe-en.mp4 \
+  --start 9.5 --seconds 20.75 --fps 24 \
+  --title 'Clerk and customer' --subtitle 'Two PersonaPlex agents at a coffee shop'
+sbatch --cpus-per-task=16 workers/render.sbatch \
+  --recording runs/showcase-3 --output output/duplex-arena-three-agents-en.mp4 \
+  --start 0 --seconds 14.92 --fps 24 \
+  --title 'Three-way conversation' --subtitle 'Two PersonaPlex agents + Moshi'
+```
+
+Wait for all three render jobs to complete before submitting `edit_film.sbatch`,
+or use Slurm `--dependency=afterok:JOB1:JOB2:JOB3`.

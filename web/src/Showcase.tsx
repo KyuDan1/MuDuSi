@@ -114,20 +114,17 @@ export default function Showcase() {
     <main className="showcase">
       <header className="showcase-header">
         <div>
-          <div className="showcase-eyebrow">
-            DUPLEX ARENA / REAL MODEL RECORDING
-          </div>
           <h1>
             {params.get("title") ||
               (state.agents.length === 2
-                ? "Two voices. A shared conversation."
-                : "Three voices. One shared space.")}
+                ? "Two friends"
+                : "Three-way conversation")}
           </h1>
           <p>
             {params.get("subtitle") ||
               (state.agents.length === 2
-                ? "두 에이전트의 대화"
-                : "세 에이전트의 대화")}{" "}
+                ? "A conversation between friends"
+                : "Three people, one conversation")}{" "}
             <span>Listen · speak · overlap</span>
           </p>
         </div>

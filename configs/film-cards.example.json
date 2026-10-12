@@ -1,36 +1,32 @@
 [
   {
     "file": "intro.png",
-    "eyebrow": "DUPLEX ARENA",
-    "title": "함께 듣고 말하는 AI",
-    "subtitle": "Real voices. Shared space. Full-duplex conversations.",
+    "title": "Duplex Arena",
+    "subtitle": "Full-duplex conversations in a shared space",
     "number": "00",
     "count": 3,
     "accent": "#c7f36b"
   },
   {
     "file": "friends.png",
-    "eyebrow": "01 / TWO PERSONS",
-    "title": "2명 · 친구와 친구",
-    "subtitle": "PersonaPlex + Moshi · A casual conversation",
+    "title": "Two friends",
+    "subtitle": "PersonaPlex + Moshi",
     "number": "01",
     "count": 2,
     "accent": "#c7f36b"
   },
   {
     "file": "cafe.png",
-    "eyebrow": "02 / TWO PERSONS",
-    "title": "2명 · 점원과 손님",
-    "subtitle": "PersonaPlex + PersonaPlex · At the coffee shop",
+    "title": "Clerk and customer",
+    "subtitle": "Two PersonaPlex agents at a coffee shop",
     "number": "02",
     "count": 2,
     "accent": "#f4ba73"
   },
   {
     "file": "three.png",
-    "eyebrow": "03 / THREE PERSONS",
-    "title": "3명 · 함께하는 대화",
-    "subtitle": "Two PersonaPlex voices + Moshi · One shared space",
+    "title": "Three-way conversation",
+    "subtitle": "Two PersonaPlex agents + Moshi",
     "number": "03",
     "count": 3,
     "accent": "#b6a0f8"

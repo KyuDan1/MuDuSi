@@ -46,6 +46,7 @@ def main():
     serve.add_argument("--seed", default=42, type=int)
     serve.add_argument("--scenario", default="roundtable", choices=["roundtable", "interruption", "cocktail", "quiet"])
     serve.add_argument("--models", help="JSON worker configuration; omit for a GPU-free synthetic demo")
+    serve.add_argument("--replay", help="Replay a completed evaluation directory without contacting GPU workers")
     serve.add_argument("--asr-model", help="Optional faster-whisper model, e.g. tiny; downloads weights on first use")
     serve.add_argument("--asr-device", default="cpu", choices=["cpu", "cuda"])
     serve.add_argument("--asr-agent", default="moshi", choices=["persona", "moshi", "custom"])
@@ -54,6 +55,8 @@ def main():
     evaluate_parser.add_argument("--scenario", default="roundtable", choices=["roundtable", "interruption", "cocktail", "quiet"])
     evaluate_parser.add_argument("--seconds", default=18.0, type=float)
     evaluate_parser.add_argument("--output", default="runs/evaluation")
+    evaluate_parser.add_argument("--models", help="Evaluate real workers at wall-clock 1x instead of the synthetic demo")
+    evaluate_parser.add_argument("--configuration", help="JSON acoustic controls (noise_db, reverb, agents)")
     args = parser.parse_args()
     if args.command == "serve":
         import uvicorn
@@ -62,11 +65,20 @@ def main():
         if args.asr_model:
             from .asr import ASRObserver
             observer = ASRObserver(model_name=args.asr_model, device=args.asr_device, agent_id=args.asr_agent)
-        uvicorn.run(create_app(seed=args.seed, scenario=args.scenario, models=args.models, asr=observer), host=args.host, port=args.port)
+        uvicorn.run(create_app(seed=args.seed, scenario=args.scenario, models=args.models, asr=observer, replay=args.replay), host=args.host, port=args.port)
     else:
         if not math.isfinite(args.seconds) or args.seconds <= 0 or args.seconds > 3600:
             parser.error("--seconds must be in (0, 3600]")
-        print(json.dumps(evaluate(args.seed, args.scenario, args.seconds, args.output), indent=2))
+        if args.models:
+            import asyncio
+            from .evaluation import evaluate_live
+            configuration = json.loads(Path(args.configuration).read_text()) if args.configuration else None
+            result = asyncio.run(evaluate_live(args.models, args.output, args.seconds, args.seed, args.scenario, configuration))
+        else:
+            if args.configuration:
+                parser.error("--configuration requires --models")
+            result = evaluate(args.seed, args.scenario, args.seconds, args.output)
+        print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ can emit audio while receiving audio.
 | `moshi` | Official PyTorch `moshi.server`, `/api/chat` | Streaming Opus | Generated model text |
 | `personaplex` | NVIDIA PersonaPlex `moshi.server`, `/api/chat` | Streaming Opus | Generated model text |
 | `pcm` | Your worker, any configured path | Mono float32 little-endian | Your worker's generated text |
+| `raon` | Raon official SGLang runtime, `/realtime/ws` | Kind byte + float32 PCM | Generated model text |
 
 Native bridges follow the upstream [Moshi server](https://github.com/kyutai-labs/moshi/blob/main/moshi/moshi/server.py)
 and [PersonaPlex server](https://github.com/NVIDIA/personaplex/blob/main/moshi/moshi/server.py):
@@ -63,6 +64,26 @@ readiness, including persona conditioning. Set `startup_timeout` per agent
 (seconds, default 120, maximum 600). Native reference servers serialize sessions;
 allocate a distinct worker process per concurrent native agent. The sample CPU
 echo worker can accept several independent connections on one port.
+
+An optional `label` (up to 80 characters) changes the displayed agent name without
+changing its stable slot ID. For example, `{"id":"moshi", "backend":"raon",
+"label":"Raon", "url":"ws://127.0.0.1:8998/realtime/ws"}` replaces the second
+model while retaining the third slot for a WAV stimulus. The official Raon
+protocol is not Opus: byte 0 is ready, 1 is PCM, 2 is text, 5/6 are error/close,
+and 8 is pong. Use `workers/launch_raon.sh` with an existing source checkout and
+exported SGLang bundle. The alternative `workers.raon_worker` directly exercises
+stateful PyTorch decoding, but failed real-time pacing on B200; it raises on
+queue overflow instead of discarding observations. See the server verification
+report before choosing a Raon backend.
+
+`duplex-arena evaluate --models ...` records all frames at wall-clock 1×, including
+each source's emitted WAV, spatial receiver WAV, and the previous receiver block
+actually submitted to the adapter (`*-input.wav`, before lossy Opus encoding).
+Failures produce a partial summary with `completed: false` and a nonzero exit.
+`serve --replay RUN` reads those artifacts, never connects model workers, and
+rejects changes to recorded acoustics. Optional `asr.json` from
+`workers.transcribe_recording` adds offline receiver ASR separately from generated
+text. Stop at episode end; Reset starts playback again.
 
 ## Adapter API
 

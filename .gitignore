@@ -11,6 +11,7 @@ web/dist/
 .env
 !*.env.example
 runs/
+output/
 *.wav
 *.npz
 *.pt

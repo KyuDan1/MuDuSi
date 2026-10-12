@@ -1,5 +1,8 @@
 # Verification of v0.1
 
+For actual Linux/B200 inference results, see [B200 verification](B200_VERIFICATION.md).
+The original development-machine checks below are retained as historical scope.
+
 Checked locally on macOS/Apple Silicon, Python 3.14 and Node.js 24.
 The GitHub workflow separately targets Ubuntu, Python 3.12 and Node.js 22.
 

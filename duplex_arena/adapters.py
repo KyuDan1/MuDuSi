@@ -359,6 +359,34 @@ class MoshiWebSocketAdapter(StreamAdapter):
             raise AdapterError(f"Unexpected native worker message kind {kind}")
 
 
+class RaonWebSocketAdapter(StreamAdapter):
+    """Official Raon realtime protocol: kind byte followed by float32 PCM."""
+
+    async def _handshake(self) -> None:
+        message = await self._ws.recv()
+        if not isinstance(message, bytes) or not message or message[0] != 0:
+            raise AdapterError("Expected Raon ready frame")
+        self._worker_name = "Raon-SpeechChat-9B (SGLang)"
+
+    def _encode(self, pcm: np.ndarray) -> bytes:
+        return b"\x01" + pcm.astype("<f4", copy=False).tobytes()
+
+    def _on_message(self, message: str | bytes) -> None:
+        if not isinstance(message, bytes) or not message:
+            raise AdapterError("Expected binary Raon frame")
+        kind, payload = message[0], message[1:]
+        if kind == 1:
+            if not payload or len(payload) % 4:
+                raise AdapterError("Invalid Raon PCM length")
+            self._append_audio(np.frombuffer(payload, dtype="<f4"))
+        elif kind == 2:
+            self._append_text(payload.decode("utf-8"))
+        elif kind in (5, 6):
+            raise AdapterError("Raon stopped: " + payload.decode("utf-8", errors="replace"))
+        elif kind != 8:  # PONG
+            raise AdapterError(f"Unexpected Raon message kind {kind}")
+
+
 class PersonaPlexWebSocketAdapter(MoshiWebSocketAdapter):
     def __init__(self, url: str, *, voice_prompt: str = "NATF2.pt",
                  text_prompt: str = "You enjoy having a good conversation.", **kwargs: Any):
@@ -403,8 +431,14 @@ def build_adapters(config_path: str | Path) -> dict[str, StreamAdapter]:
                 if key in item:
                     kwargs[key] = item[key]
             adapter = PersonaPlexWebSocketAdapter(url, **kwargs)
+        elif backend == "raon":
+            adapter = RaonWebSocketAdapter(url, **kwargs)
         else:
             raise ValueError(f"Unknown backend {backend!r} for agent {agent_id}")
+        label = item.get("label", "Raon" if backend == "raon" else None)
+        if label is not None and (not isinstance(label, str) or not label.strip() or len(label) > 80):
+            raise ValueError("Agent label must be a nonempty string of at most 80 characters")
+        adapter.display_name = label
         adapters[agent_id] = adapter
     if not adapters:
         raise ValueError("Configure at least one worker")

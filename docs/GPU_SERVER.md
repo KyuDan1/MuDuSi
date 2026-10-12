@@ -1,5 +1,10 @@
 # Run on a multi-GPU Linux server
 
+On the shared B200/k8sl cluster, full evaluations belong in Slurm, with both
+workers and the simulator inside the same job. Worker ingress is closed; use
+`serve --replay` on completed artifacts for the viewer instead of forwarding into
+a worker. See [tested B200 commands and results](B200_VERIFICATION.md).
+
 Use one worker process and one visible GPU per native speech agent, with the
 arena and viewer served by a lightweight CPU process. For example, GPU 0 runs
 Moshi, GPU 1 runs PersonaPlex, and GPU 2 can run a custom speech model. A custom
@@ -101,10 +106,10 @@ independent conversations. The CPU echo worker is multi-session and is only a
 protocol probe. It will be silent when its received signal is silent.
 
 Keep model ports on a private network. **The reviewed PersonaPlex server ignores
-`--host` in its final `web.run_app` call**, so the launcher's loopback flag alone
-does not guarantee loopback binding for that revision. Verify listening sockets
-and use your server firewall or an isolated container/network namespace to
-prevent unintended access. See the [upstream server implementation](https://github.com/NVIDIA/personaplex/blob/main/moshi/moshi/server.py).
+`--host` in its final `web.run_app` call**. The launcher now runs
+`workers.native_server`, which enforces the requested aiohttp bind address without
+editing a shared upstream checkout. Direct `python -m moshi.server` invocations
+still have the upstream behavior. See the [upstream server implementation](https://github.com/NVIDIA/personaplex/blob/main/moshi/moshi/server.py).
 
 ## 4. Connect and open the arena
 

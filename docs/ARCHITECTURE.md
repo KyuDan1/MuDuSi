@@ -86,8 +86,8 @@ because it can contain private worker addresses and prompts.
 | CPU acoustic core | Implemented | Impulse delay, superposition, loss, echo and seed tests |
 | 3D observation | Implemented | Live telemetry, controls, receiver playback and exports |
 | Worker transports | Implemented | Echo loop and Opus protocol/codec checks |
-| Real GPU model exercise | Server follow-up | Load approved weights, run model pairs, inspect streaming counters |
-| Receiver ASR | Optional implementation | Enable ASR extra and model; validate transcripts on known speech |
+| Real GPU model exercise | B200 PersonaPlex/Moshi verified | Two paced conversations, source/receiver/input WAVs, buffer diagnostics and 3D replay |
+| Receiver ASR | Offline Whisper verified on B200 run artifacts | Separate generated text from noisy receiver recognition |
 | On-policy environment integration | Implemented toy gate | Current-policy rollouts and per-agent temporal credit |
 | SLM token-policy trainer | Planned | Model-side token log-probs, aligned reward/value streams, policy barriers |
 | High fidelity acoustics | Planned | Measured or image-source RIR, HRTF, directional microphones, RT60 validation |
@@ -104,3 +104,10 @@ Use an SSH tunnel or a trusted authenticated reverse proxy on a GPU server.
 Future work should separate experiment orchestration from real-time interaction,
 add vectorized headless environments and policy barriers, and reserve GPU memory
 separately for inference, training, ASR and reward models.
+
+`evaluation.evaluate_live` now reuses the viewer Session for bounded batch
+experiments. `ReplaySession` serves completed trace/WAV artifacts without any
+connection back to a batch worker; it rejects acoustic edits and labels playback
+as recorded. Model launchers and the evaluator are co-located within a Slurm pod.
+See [measured server results](B200_VERIFICATION.md) and the
+[SLM learner contract](SLM_TRAINING.md).

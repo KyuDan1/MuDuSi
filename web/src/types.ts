@@ -46,6 +46,7 @@ export type Snapshot = {
   seed: number;
   scenario: string;
   mode: "demo" | "live";
+  replay?: { enabled: boolean; frame: number; frames: number };
   sample_rate: number;
   frame_ms: number;
   room: {

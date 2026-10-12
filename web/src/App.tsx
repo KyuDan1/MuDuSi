@@ -426,7 +426,7 @@ export default function App() {
     configure({ agents: [{ id: agent.id, position }] });
   };
   const incoming = state?.links.filter((l) => l.target === agent?.id) ?? [];
-  const hasAsr = !!state?.asr?.enabled && state.asr.agent_id === agent?.id;
+  const hasAsr = !!state?.asr?.enabled && (state.asr.agent_id === agent?.id || !!state.replay?.enabled);
   const events = [...(state?.events ?? []), ...(state?.asr_events ?? [])].sort(
     (a, b) => a.time - b.time,
   );
@@ -471,7 +471,7 @@ export default function App() {
               className={`mode-badge ${state?.mode === "live" ? "live" : ""}`}
             >
               <span />
-              {state?.mode === "live"
+              {state?.replay?.enabled ? "Recorded model replay" : state?.mode === "live"
                 ? "Live model workers"
                 : "Synthetic demo · no GPU"}
             </span>
@@ -876,7 +876,7 @@ export default function App() {
                         ? "MODEL TRANSCRIPT"
                         : "SCRIPTED CAPTION"}
                     <span className="caption-tag">
-                      {agent.transcript_kind === "scripted" ? "DEMO" : "LIVE"}
+                      {state?.replay?.enabled ? "RECORDED" : agent.transcript_kind === "scripted" ? "DEMO" : "LIVE"}
                     </span>
                   </div>
                   <p>{agent.transcript || "No utterance in this frame."}</p>
@@ -886,7 +886,7 @@ export default function App() {
                       ? state?.asr?.error
                         ? "Receiver ASR error"
                         : state?.asr?.ready
-                          ? "Receiver ASR connected"
+                          ? state?.replay?.enabled ? "Offline receiver ASR" : "Receiver ASR connected"
                           : "Receiver ASR loading…"
                       : "ASR not connected"}
                   </div>
@@ -895,7 +895,7 @@ export default function App() {
                       <div className="section-label">
                         RECEIVER ASR
                         <span>
-                          {state?.asr?.lag_seconds !== undefined
+                          {state?.replay?.enabled ? "OFFLINE" : state?.asr?.lag_seconds !== undefined
                             ? `${finite(state.asr.lag_seconds)}s lag`
                             : "WINDOWED"}
                         </span>
@@ -1150,7 +1150,7 @@ export default function App() {
             DUPLEX ARENA <i>/</i> An observable world for speech agents.
           </span>
           <span>
-            {state?.mode === "live"
+            {state?.replay?.enabled ? "Recorded batch experiment · controls cannot change recorded acoustics" : state?.mode === "live"
               ? "Model adapters connected"
               : "Synthetic adapters · connect real models on your GPU server"}
             <span className="footer-dot" />

@@ -56,7 +56,8 @@ duplex-arena serve --models configs/workers.example.json
 정확한 실행 명령과 CUDA 배치는 [GPU 서버 가이드](docs/GPU_SERVER.md),
 모델별 프로토콜과 제약은 [모델 연결 문서](docs/MODELS.md)에 있습니다.
 모델 하나가 GPU 하나에 들어가는지는 VRAM, 정밀도, 컨텍스트 길이에 따라 달라집니다.
-이 저장소에서 실제 GPU 가중치 추론은 아직 검증하지 않았습니다.
+실제 B200에서 PersonaPlex–Moshi의 60초 대화와 수신 WAV/ASR을 검증했습니다.
+측정 결과와 Slurm 재실행 방법은 [B200 검증 기록](docs/B200_VERIFICATION.md)에 있습니다.
 
 CPU만으로 실제 네트워크 경로를 먼저 확인할 수 있습니다.
 
@@ -72,6 +73,12 @@ duplex-arena serve --models configs/echo.example.json
 ```bash
 # 재현 가능한 데모 평가. 각 마이크 WAV + 전체 trace.jsonl + summary.json
 duplex-arena evaluate --scenario cocktail --seed 42 --seconds 18 --output runs/cocktail
+
+# 실제 워커 평가: 송신/수신/모델 입력 WAV와 전체 trace를 wall-clock 1×로 기록
+duplex-arena evaluate --models configs/local-workers.json --seconds 60 --output runs/live
+
+# 종료된 GPU 작업의 실제 오디오·3D 상태를 CPU에서 재생
+duplex-arena serve --replay runs/live --port 18766
 
 # 작은 speak/listen gate 정책의 실제 REINFORCE 업데이트 (CPU)
 python examples/on_policy.py --episodes 12 --output runs/gates

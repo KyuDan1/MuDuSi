@@ -100,11 +100,15 @@ class Session:
             state["events"] = list(self.model_events)
             for agent in state["agents"]:
                 adapter = self.adapters.get(agent["id"])
+                if adapter and getattr(adapter, "display_name", None):
+                    agent["name"] = adapter.display_name
                 agent["transcript"] = self.model_text[agent["id"]]
                 agent["transcript_kind"] = "model"
                 agent["model"] = (getattr(adapter, "stats", {}).get("worker_name") or agent["name"]) if adapter else "Unconnected · silent"
                 agent["transport"] = type(adapter).__name__ if adapter else None
                 agent["worker"] = getattr(adapter, "stats", {}) if adapter else {"connected": False}
+                if agent["worker"].get("worker_name") == "wav-stimulus" and not getattr(adapter, "display_name", None):
+                    agent["name"] = "WAV stimulus"
         state["asr"] = {"enabled": self.asr is not None, **(self.asr.stats if self.asr else {})}
         state["asr_events"] = list(self.asr_events)
         for agent in state["agents"]:
@@ -212,8 +216,14 @@ class Session:
             await asyncio.sleep(max(0.001, interval - elapsed))
 
 
-def create_app(seed=42, scenario="roundtable", models=None, asr=None):
-    session = Session(seed, scenario, models, asr)
+def create_app(seed=42, scenario="roundtable", models=None, asr=None, replay=None):
+    if replay:
+        if models or asr:
+            raise ValueError("Replay cannot connect models or ASR")
+        from .replay import ReplaySession
+        session = ReplaySession(replay)
+    else:
+        session = Session(seed, scenario, models, asr)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -242,7 +252,7 @@ def create_app(seed=42, scenario="roundtable", models=None, asr=None):
 
     @app.get("/api/health")
     async def health():
-        return {"status": "error" if session.error else "ok", "mode": "live" if models else "demo", "error": session.error}
+        return {"status": "error" if session.error else "ok", "mode": "replay" if replay else "live" if models else "demo", "error": session.error}
 
     @app.get("/api/state")
     async def state():
@@ -252,6 +262,9 @@ def create_app(seed=42, scenario="roundtable", models=None, asr=None):
     async def control(command: Control):
         async with session.lock:
             try:
+                if replay and (command.action == "configure" or any(value is not None for value in
+                    (command.seed, command.scenario, command.noise_db, command.reverb, command.agents))):
+                    raise ValueError("Recorded replay is read-only; run another batch to change acoustics")
                 if command.speed is not None:
                     if models and command.speed != 1:
                         raise ValueError("Live model streaming runs at 1× wall-clock speed.")
@@ -282,10 +295,10 @@ def create_app(seed=42, scenario="roundtable", models=None, asr=None):
     @app.get("/api/export")
     async def export():
         session.collect_asr()
-        return {"schema_version": 1, "meta": {"mode": "live" if models else "demo", "seed": session.engine.seed,
+        return {"schema_version": 1, "meta": {"mode": "replay" if replay else "live" if models else "demo", "seed": session.engine.seed,
                 "sample_rate": session.engine.sample_rate, "frame_size": session.engine.frame_size,
                 "trace_limit_frames": 3000, "acoustics": "direct delay, inverse-distance gain, partition loss, simple echo",
-                "transcripts": "generated model text, not ASR" if models else "scripted demo captions, not ASR",
+                "transcripts": "generated model text, not ASR" if models or replay else "scripted demo captions, not ASR",
                 "reward": "heuristic acoustic proxy, not semantic quality"}, "frames": list(session.trace),
                 "asr_events": list(session.asr_events), "asr": session.snapshot()["asr"]}
 

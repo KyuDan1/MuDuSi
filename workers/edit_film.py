@@ -79,7 +79,7 @@ def main():
     command += ['-filter_complex', ';'.join(filters), '-map', '[video]', '-map', f'[{previous_a}]',
                 '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-threads', '4', '-pix_fmt', 'yuv420p',
                 '-r', str(fps), '-c:a', 'aac', '-ar', '48000', '-b:a', '192k', '-t', str(duration),
-                '-movflags', '+faststart', '-metadata', 'title=Duplex Arena — Friends, Cafe, Three Agents', str(output)]
+                '-movflags', '+faststart', '-metadata', 'title=MuDuSi — Friends, Cafe, Three Agents', str(output)]
     subprocess.run(command, check=True)
     decoded = subprocess.run([ffmpeg, '-v', 'error', '-i', str(output), '-map', '0:v:0', '-map', '0:a:0',
                               '-threads', '4', '-progress', 'pipe:1', '-f', 'null', '-'], capture_output=True, text=True, check=True)

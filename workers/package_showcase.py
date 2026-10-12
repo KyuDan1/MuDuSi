@@ -24,7 +24,7 @@ def main():
             listing.write("file '" + str(clip).replace("'", "'\\''") + "'\n")
         listing.flush()
         subprocess.run([ffmpeg, '-y', '-hide_banner', '-f', 'concat', '-safe', '0', '-i', listing.name,
-                        '-c', 'copy', '-movflags', '+faststart', '-metadata', 'title=Duplex Arena — Two and Three Agents',
+                        '-c', 'copy', '-movflags', '+faststart', '-metadata', 'title=MuDuSi — Two and Three Agents',
                         '-metadata', 'comment=Real model emissions. Word-timed offline ASR. Recorded spatial interaction.', str(output)], check=True)
     checks = {}
     for clip in [*clips, output]:

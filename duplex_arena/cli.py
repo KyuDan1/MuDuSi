@@ -38,7 +38,7 @@ def evaluate(seed=42, scenario="roundtable", seconds=18.0, output="runs/evaluati
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="duplex-arena", description="Full-duplex speech simulation lab")
+    parser = argparse.ArgumentParser(prog="mudusi", description="MuDuSi — Multi-agent Duplex Simulator")
     commands = parser.add_subparsers(dest="command", required=True)
     serve = commands.add_parser("serve", help="Start the local API and built 3D viewer")
     serve.add_argument("--host", default="127.0.0.1")

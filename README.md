@@ -1,64 +1,75 @@
 <div align="center">
 
-# Duplex Arena
+# MuDuSi
 
-**Full-duplex speech agents, sharing one acoustic world.**
+**Multi-agent Duplex Simulator**
 
-[![Simulator checks](https://github.com/KyuDan1/duplex-arena/actions/workflows/check.yml/badge.svg)](https://github.com/KyuDan1/duplex-arena/actions/workflows/check.yml)
+Full-duplex speech agents, sharing one acoustic world.
 
-A 3D simulator for multi-agent conversation, evaluation, and acoustic trajectory collection.
+[![Simulator checks](https://github.com/KyuDan1/MuDuSi/actions/workflows/check.yml/badge.svg)](https://github.com/KyuDan1/MuDuSi/actions/workflows/check.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[Technical report](doc/duplex-arena-technical-report.pdf) · [Quick start](#quick-start) · [Simulation modes](#simulation-modes) · [GPU setup](docs/GPU_SERVER.md) · [Architecture](docs/ARCHITECTURE.md)
+Test speech agents in a virtual acoustic world before arranging microphones, speakers, and physical devices.
+
+[Project page](https://mudusi.chirpy-tulip-0991.chatgpt.site) · [Technical report](doc/mudusi-technical-report.pdf) · [Quick start](#quick-start) · [Simulation modes](#simulation-modes) · [GPU setup](docs/GPU_SERVER.md) · [Contribute](CONTRIBUTING.md)
 
 **24 kHz audio · simultaneous listening and speaking · per-agent microphone recordings**
 
 </div>
 
-### Two friends
+Watch the two-friend, clerk/customer, and three-agent conversations on the [project page](https://mudusi.chirpy-tulip-0991.chatgpt.site). The examples use actual model-generated speech; captions are offline, word-timed ASR. See [recording provenance and limitations](docs/SHOWCASE.md).
 
-<video controls playsinline width="100%" poster="doc/media/two-friends.jpg" src="https://github.com/KyuDan1/duplex-arena/raw/refs/heads/main/doc/media/two-friends.mp4"></video>
+## Why MuDuSi?
 
-[Watch with sound](doc/media/two-friends.mp4) — PersonaPlex and Moshi share a casual conversation. Two independent models hear each other through the simulated room.
+Testing conversational speech systems often starts with assembling devices, routing microphones and speakers, arranging a room, and repeatedly recording interactions. MuDuSi replaces that initial acoustic setup with software: connect independent model workers, place their agents in a shared 3D room, and inspect what each agent says and actually hears. No physical microphone or speaker is required for these simulated tests.
 
-### Clerk and customer
+This makes early integration, controlled acoustic comparisons, and rollout inspection easier to repeat. It also preserves evidence that a physical demo can be hard to reconstruct: each source waveform, each microphone mixture, the exact model-input blocks, and the corresponding scene and timing. Real-device validation remains a separate step for microphone/speaker response, hardware latency, feedback, echo cancellation, and real-room acoustics.
 
-<video controls playsinline width="100%" poster="doc/media/clerk-customer.jpg" src="https://github.com/KyuDan1/duplex-arena/raw/refs/heads/main/doc/media/clerk-customer.mp4"></video>
+## Features and current scope
 
-[Watch with sound](doc/media/clerk-customer.mp4) — Two PersonaPlex agents take the roles of a cafe clerk and customer: an iced oat-latte and croissant order, followed by confirmation.
+| Capability | Available today | Scope |
+|---|---|---|
+| **Multi-agent conversations** | Independent input/output streams let agents listen and speak simultaneously; tested two- and three-agent conversations | Three named slots per simulation; native models need separate worker processes/endpoints |
+| **Spatial acoustics** | Distance attenuation, sample-level propagation delay, divider occlusion, one wall reflection, and independent microphone noise | Mono audio; no calibrated RIR, HRTF, diffraction, or self-echo |
+| **Acoustic scenes and stimuli** | Roundtable, interruption, cocktail, and quiet presets; position/mute/noise/reflection controls; WAV stimulus worker | Noise is Gaussian; a WAV source occupies one agent slot. Preset demo dialogue does not script real-model responses |
+| **3D observation and replay** | Speaker/listener activity, per-agent receiver monitoring, TX/RX levels, overlap, timing, buffer counters, and recorded scene playback | One experiment per server; several browsers observe that same experiment |
+| **Model integration** | Native PersonaPlex/Moshi bridges, a Raon adapter, and a generic streaming PCM worker protocol | PersonaPlex/Moshi conversations verified; Raon has documented quality/pacing limits; new models need compatible workers |
+| **ASR and speaker analysis** | Optional receiver ASR; offline emitted/received-audio transcription; clean source channels retained alongside microphone mixtures | Built-in ASR does not diarize speakers. Diarization models can process saved mixtures externally; speaker-attributed live events need an added observer/schema |
+| **RL trajectory inspection** | Aligned input/action/receiver WAVs, frame traces, acoustic rewards, and a trainer-controlled Python environment | Toy on-policy gate training works; full SLM policy training and token-level rollout instrumentation are future integrations |
 
-### Three-way conversation
+### Independent experiments in parallel
 
-<video controls playsinline width="100%" poster="doc/media/three-agents.jpg" src="https://github.com/KyuDan1/duplex-arena/raw/refs/heads/main/doc/media/three-agents.mp4"></video>
+Run separate server processes on separate ports to compare independent simulations in browser tabs. Each process owns its own scene, clock, and history; opening two tabs on the same port shares one experiment. For example, two CPU demonstrations can run in separate terminals:
 
-[Watch with sound](doc/media/three-agents.mp4) — Two PersonaPlex voices and one Moshi agent converse in the same room, including simultaneous speech.
+```bash
+mudusi serve --scenario quiet --port 8765
+mudusi serve --scenario cocktail --port 8766
+```
 
-These selected clips contain **actual model-generated audio**, with no prerecorded speaker or scripted dialogue. Speech bubbles are offline ASR of each agent's emitted audio, revealed at word timestamps. The soundtrack mixes clean emissions; each agent's spatially mixed receiver audio is saved separately. See [recording provenance and limitations](docs/SHOWCASE.md).
+For concurrent real-model experiments, allocate separate worker sessions/endpoints, adequate GPU resources, and distinct recording directories. The native reference servers serialize sessions, so reusing one endpoint does not create independent concurrent agents. There is no built-in multi-experiment dashboard or vectorized rollout scheduler; use separate processes or batch jobs and replay their outputs.
 
-## What the simulator does
+### See what an RL policy experienced
 
-Each agent emits audio while receiving everyone else's audio, transformed by distance, propagation delay, divider occlusion, a wall reflection, and independent microphone noise. The same PCM engine powers the 3D viewer, recorded evaluations, and the Python environment interface.
+A scalar reward cannot show whether an agent answered through noise, spoke over another agent, or received a delayed utterance. MuDuSi links the acoustic observations and emitted actions to the room state and per-frame reward terms. Researchers can inspect the trajectory, listen to an agent's actual input, and compare recorded episodes before choosing or debugging a training objective.
 
-- **Observe:** speaker and listener activity, TX/RX levels, overlap, timing, and buffer diagnostics in 3D.
-- **Experiment:** change positions, noise, occlusion, and scenarios; connect PersonaPlex, Moshi, or a custom PCM worker.
-- **Record:** preserve source audio, receiver audio, actual model-input blocks, frame traces, and acoustic rewards.
-- **Replay:** inspect a finished GPU experiment on a CPU machine, without loading model weights.
+Completed native-model evaluations replay in the 3D viewer. The Python environment exposes observations, rewards, boundary flags, and scene snapshots for custom trainers; recording or displaying a custom trainer's rollouts requires connecting that trainer to the export/viewer path. Neither the viewer nor an acoustic recording supplies the missing SLM token log-probabilities or performs model-weight optimization. See the [two workflows below](#simulation-modes) and the [SLM training interface plan](docs/SLM_TRAINING.md).
 
 ## Quick start
 
 Requires Python 3.11+ and Node.js 22+. Model workers use separate environments; Python 3.12 is a suitable starting point for their dependencies.
 
 ```bash
-git clone https://github.com/KyuDan1/duplex-arena.git
-cd duplex-arena
+git clone https://github.com/KyuDan1/MuDuSi.git MuDuSi
+cd MuDuSi
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
 npm --prefix web ci
 npm --prefix web run build
-duplex-arena serve
+mudusi serve
 ```
 
-Open **http://127.0.0.1:8765** and press **Run**. This default mode needs no GPU or model download: it uses synthetic tones and scripted captions to demonstrate the simulator. The videos above use real model workers.
+Open **http://127.0.0.1:8765** and press **Run**. This default mode needs no GPU or model download: it uses synthetic tones and scripted captions to demonstrate the simulator. The videos on the project page use real model workers.
 
 For frontend development, run `npm --prefix web run dev` in a second terminal. The viewer on port 5173 connects to the API on port 8765.
 
@@ -88,15 +99,15 @@ cp configs/workers.example.json configs/local-workers.json
 # Edit configs/local-workers.json, then start its workers.
 
 # Interactive simulation: open the viewer and press Run.
-duplex-arena serve --models configs/local-workers.json
+mudusi serve --models configs/local-workers.json
 
 # Headless evaluation: records a complete 60-second conversation at wall-clock 1×.
-duplex-arena evaluate --models configs/local-workers.json \
+mudusi evaluate --models configs/local-workers.json \
   --scenario quiet --seconds 60 --output runs/conversation
 
 # Optional room controls: add --configuration configs/two-agent-stage.example.json.
 # After evaluation completes, replay its audio and 3D state without GPU workers.
-duplex-arena serve --replay runs/conversation --port 18766
+mudusi serve --replay runs/conversation --port 18766
 ```
 
 Open `http://127.0.0.1:18766/` for the engineering view or `http://127.0.0.1:18766/?showcase` for presentation playback. For a remote replay server:
@@ -123,7 +134,7 @@ The batch launcher starts and stops its workers automatically. For PersonaPlex�
 A real-model evaluation already records an **acoustic trajectory**. Use a new output directory for each episode:
 
 ```bash
-duplex-arena evaluate --models configs/local-workers.json \
+mudusi evaluate --models configs/local-workers.json \
   --configuration configs/two-agent-stage.example.json \
   --seed 42 --seconds 60 --output runs/trajectories/episode-0001
 ```
@@ -180,16 +191,22 @@ Check the CPU engine and worker transport without model weights:
 
 ```bash
 # Synthetic evaluation and tests.
-duplex-arena evaluate --scenario cocktail --seed 42 --seconds 18 --output runs/demo
+mudusi evaluate --scenario cocktail --seed 42 --seconds 18 --output runs/demo
 pytest -q
 
 # In separate terminals: an echo protocol probe, then its viewer (not a language model).
 python -m workers.echo_worker --port 9001
-duplex-arena serve --models configs/echo.example.json
+mudusi serve --models configs/echo.example.json
 ```
+
+## Contributing
+
+Contributions to model workers, acoustic validation, speech analysis, evaluation tasks, and rollout/trainer interfaces are welcome. The [contribution guide](CONTRIBUTING.md) covers local setup, focused checks, adapter requirements, reproducible evidence, and recording privacy. Please distinguish implemented behavior from proposed integrations in code, examples, and claims.
 
 ## Documentation
 
-[Technical report (PDF)](doc/duplex-arena-technical-report.pdf) · [LaTeX source](doc/duplex-arena-technical-report.tex) · [Architecture](docs/ARCHITECTURE.md) · [GPU setup](docs/GPU_SERVER.md) · [Model protocols](docs/MODELS.md) · [ASR](docs/ASR.md) · [Showcase recording](docs/SHOWCASE.md) · [SLM training plan](docs/SLM_TRAINING.md)
+[Technical report (PDF)](doc/mudusi-technical-report.pdf) · [LaTeX source](doc/mudusi-technical-report.tex) · [Architecture](docs/ARCHITECTURE.md) · [GPU setup](docs/GPU_SERVER.md) · [Model protocols](docs/MODELS.md) · [ASR](docs/ASR.md) · [Showcase recording](docs/SHOWCASE.md) · [SLM training plan](docs/SLM_TRAINING.md)
+
+Simulator code is available under the [MIT license](LICENSE). Model weights and bundled font assets retain their own licenses.
 
 Built around [NVIDIA PersonaPlex](https://github.com/NVIDIA/personaplex) and [Kyutai Moshi](https://github.com/kyutai-labs/moshi). Model names identify supported integrations; they do not imply affiliation with their providers.

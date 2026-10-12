@@ -324,7 +324,7 @@ class MoshiWebSocketAdapter(StreamAdapter):
         try:
             sphn = importlib.import_module("sphn")
         except ImportError as exc:
-            raise AdapterError("Native models require optional codec: pip install 'duplex-arena[models]'") from exc
+            raise AdapterError("Native models require optional codec: pip install -e '.[models]'") from exc
         self._opus_reader = sphn.OpusStreamReader(SAMPLE_RATE)
         self._opus_writer = sphn.OpusStreamWriter(SAMPLE_RATE)
 

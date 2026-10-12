@@ -56,7 +56,7 @@ silent in live mode. `custom` is intentionally generic because a third model was
 not identified precisely.
 
 ```bash
-duplex-arena serve --models configs/workers.example.json
+mudusi serve --models configs/workers.example.json
 ```
 
 The arena connects to all workers concurrently. Startup waits for native model
@@ -76,7 +76,7 @@ stateful PyTorch decoding, but failed real-time pacing on B200; it raises on
 queue overflow instead of discarding observations. See the server verification
 report before choosing a Raon backend.
 
-`duplex-arena evaluate --models ...` records all frames at wall-clock 1×, including
+`mudusi evaluate --models ...` records all frames at wall-clock 1×, including
 each source's emitted WAV, spatial receiver WAV, and the previous receiver block
 actually submitted to the adapter (`*-input.wav`, before lossy Opus encoding).
 Failures produce a partial summary with `completed: false` and a nonzero exit.
@@ -156,7 +156,7 @@ operation with the model's streaming inference API.
 ```bash
 python -m workers.echo_worker --port 9001
 # In another terminal:
-duplex-arena serve --models configs/echo.example.json
+mudusi serve --models configs/echo.example.json
 ```
 
 ## Validation boundary and training

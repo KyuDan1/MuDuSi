@@ -1,8 +1,8 @@
 [
   {
     "file": "intro.png",
-    "title": "Duplex Arena",
-    "subtitle": "Full-duplex conversations in a shared space",
+    "title": "MuDuSi",
+    "subtitle": "Multi-agent Duplex Simulator",
     "number": "00",
     "count": 3,
     "accent": "#c7f36b"

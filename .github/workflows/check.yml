@@ -17,5 +17,5 @@ jobs:
       - run: pytest -q
       - run: npm ci && npm run build
         working-directory: web
-      - run: duplex-arena evaluate --seconds 1 --output runs/ci
+      - run: mudusi evaluate --seconds 1 --output runs/ci
       - run: python examples/on_policy.py --episodes 2 --horizon 10 --output runs/gates-ci

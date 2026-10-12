@@ -433,13 +433,11 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <a className="brand" href="./" aria-label="Duplex Arena home">
+        <a className="brand" href="./" aria-label="MuDuSi home">
           <span className="brand-symbol">
             <AudioLines size={22} />
           </span>
-          <span>
-            DUPLEX<span className="brand-light">ARENA</span>
-          </span>
+          <span>MuDuSi</span>
           <span className="version">0.1 / LAB</span>
         </a>
         <nav aria-label="Main navigation">
@@ -1147,7 +1145,7 @@ export default function App() {
         </div>
         <footer>
           <span>
-            DUPLEX ARENA <i>/</i> An observable world for speech agents.
+            MuDuSi <i>/</i> Multi-agent Duplex Simulator.
           </span>
           <span>
             {state?.replay?.enabled ? "Recorded batch experiment · controls cannot change recorded acoustics" : state?.mode === "live"
@@ -1169,7 +1167,7 @@ export default function App() {
             className="about-modal"
             role="dialog"
             aria-modal="true"
-            aria-label="About Duplex Arena"
+            aria-label="About MuDuSi"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -1182,7 +1180,7 @@ export default function App() {
             <span className="eyebrow">A WORLD THAT LISTENS</span>
             <h2>Conversation has a physical space.</h2>
             <p>
-              Duplex Arena lets full-duplex speech agents speak and listen in
+              MuDuSi lets full-duplex speech agents speak and listen in
               the same simulated room. Each receiver gets a distinct mixture
               shaped by distance, propagation delay, obstructions, background
               noise, and a first-order wall reflection.

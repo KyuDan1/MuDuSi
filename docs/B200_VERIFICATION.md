@@ -124,9 +124,9 @@ license approval or authentication was required on the validated server.
 Run the viewer in a foreground login terminal, with no GPU allocation:
 
 ```bash
-.venv/bin/duplex-arena serve --replay runs/pair-near --host 127.0.0.1 --port 18766
+.venv/bin/mudusi serve --replay runs/pair-near --host 127.0.0.1 --port 18766
 # Separate terminal for comparison:
-.venv/bin/duplex-arena serve --replay runs/pair-cocktail --host 127.0.0.1 --port 18767
+.venv/bin/mudusi serve --replay runs/pair-cocktail --host 127.0.0.1 --port 18767
 ```
 
 From the client machine:

@@ -7,19 +7,21 @@
 \usetikzlibrary{arrows.meta,positioning}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{url}
-\title{Duplex Arena: Spatial Simulation and Trajectory Collection\ for Full-Duplex Speech Agents}
-\author{Duplex Arena Project\\\url{https://github.com/KyuDan1/duplex-arena}}
+\title{MuDuSi: A Multi-Agent Acoustic Simulator\ for Full-Duplex Speech Language Models}
+\author{MuDuSi Project\\\url{https://github.com/KyuDan1/MuDuSi}}
 \newcommand{\code}[1]{\texttt{#1}}
 \begin{document}
 \maketitle
 \begin{abstract}
-Duplex Arena connects full-duplex speech models through a shared, sample-level acoustic environment. Agents emit and receive audio concurrently, while a three-dimensional observer exposes source activity, receiver levels, propagation delays, and runtime diagnostics. The same acoustic engine supports two research workflows: frozen-model conversation inference and evaluation, and trajectory collection for reinforcement-learning integration. We describe the implemented contracts, the distinction between acoustic traces and token-policy rollouts, and bounded NVIDIA B200 experiments with PersonaPlex, Moshi, and Raon. Two 60-second PersonaPlex--Moshi experiments completed at wall-clock rate with zero dropped output samples or input overflows; recorded model inputs matched the preceding receiver blocks exactly after PCM16 encoding. Additional two- and three-agent conversations supply selected audiovisual demonstrations. These measurements establish audio routing and execution feasibility, not a semantic benchmark or a trained speech policy. We document startup buffering, recognition provenance, observed dialogue failures, and the interfaces still required for full-weight speech-model reinforcement learning.
+MuDuSi (Multi-agent Duplex Simulator) provides a virtual testbed for full-duplex speech models, connecting independent sessions through a shared, sample-level acoustic environment without requiring a physical microphone and loudspeaker setup for every agent. Agents emit and receive audio concurrently, while a three-dimensional observer exposes source activity, receiver levels, propagation delays, and runtime diagnostics. The same acoustic engine supports two research workflows: frozen-model conversation inference and evaluation, and trajectory collection for reinforcement-learning integration. We describe the implemented contracts, the distinction between acoustic traces and token-policy rollouts, and bounded NVIDIA B200 experiments with PersonaPlex, Moshi, and Raon. Two 60-second PersonaPlex--Moshi experiments completed at wall-clock rate with zero dropped output samples or input overflows; recorded model inputs matched the preceding receiver blocks exactly after PCM16 encoding. Additional two- and three-agent conversations supply selected audiovisual demonstrations. These measurements establish audio routing and execution feasibility, not a semantic benchmark or a trained speech policy. We document startup buffering, recognition provenance, observed dialogue failures, and the interfaces still required for full-weight speech-model reinforcement learning.
 \end{abstract}
 
 \section{Introduction}
 Full-duplex speech models receive acoustic input while generating speech. This makes their interaction difficult to evaluate with text-only, alternating-turn harnesses: a speaker can continue, backchannel, or stop while another speaker is already active. Spatial effects add another distinction. What a source emits is not what every listener hears. Distance, occlusion, reflection, and microphone noise change the acoustic evidence available to each policy.
 
-Duplex Arena makes this interaction explicit. Independent model workers exchange audio only through a shared acoustic engine. The engine records each emitted waveform, each spatially mixed receiver waveform, and the block presented to each model adapter. A browser observes the resulting scene without controlling its clock. Completed experiments can be replayed without keeping GPUs allocated.
+Testing a deployed conversational device can require microphone and loudspeaker hardware, controlled placement, and repeated room setup. Assigning each conversational participant a physical device makes multi-agent experiments cumbersome. A virtual testbed can exercise the interaction loop before that deployment: separate model sessions exchange spatially transformed audio, while an observer compares who emitted sound, what each agent received, and when. This reduces dependence on physical devices for software experiments; it does not replace final hardware, room, or perceptual validation.
+
+MuDuSi (Multi-agent Duplex Simulator) makes this interaction explicit. Independent model workers exchange audio only through a shared acoustic engine. The engine records each emitted waveform, each spatially mixed receiver waveform, and the block presented to each model adapter. A browser observes the resulting scene without controlling its clock. Completed experiments can be replayed without keeping GPUs allocated.
 
 The project has two intended uses. In \emph{inference and evaluation}, frozen models converse under a chosen scene, and the investigator examines audio, timing, overlap, and optional recognition. In \emph{trajectory collection}, the investigator obtains aligned acoustic observations, emissions, rewards, and runtime state for analysis or a future learner. The currently implemented small REINFORCE example trains a synthetic listen/speak gate. Native speech-model inference does not expose the token probabilities needed to claim on-policy optimization of speech-language model (SLM) weights.
 
@@ -87,7 +89,7 @@ The example \code{examples/on\_policy.py} learns a four-parameter Bernoulli gate
 \subsection{Environment and protocol}
 The inspected server exposed NVIDIA B200 devices with 183,359 MiB each, driver 580.95.05, and driver CUDA ceiling 13.0. Timed model experiments ran in isolated Slurm jobs, with two GPUs, 16 CPU cores, and 96 GiB host RAM for the paired conversations. The worker image was NVIDIA PyTorch 25.04, providing a compiler for runtime kernel generation. Both primary model environments used Torch 2.8.0 with CUDA 12.8 wheels; the arena used a separate Python 3.13 environment.
 
-PersonaPlex's upstream dependency metadata pins an older Torch version, and its reused environment had unrelated package conflicts. The measurements validate the exercised inference path, not a clean dependency resolution for every installed package. Moshi's independent environment passed its dependency check. Exact source/checkpoint revisions and operational details are recorded in \href{https://github.com/KyuDan1/duplex-arena/blob/main/docs/B200_VERIFICATION.md}{the B200 execution record}.
+PersonaPlex's upstream dependency metadata pins an older Torch version, and its reused environment had unrelated package conflicts. The measurements validate the exercised inference path, not a clean dependency resolution for every installed package. Moshi's independent environment passed its dependency check. Exact source/checkpoint revisions and operational details are recorded in \href{https://github.com/KyuDan1/MuDuSi/blob/main/docs/B200_VERIFICATION.md}{the B200 execution record}.
 
 Two primary experiments used the same spoken rice-cooking stimulus, derived from PersonaPlex's example WAV and converted to the arena format. The stimulus occupied the third slot, with spoken intervals around 4.08--8.56 s and 22.64--26.88 s. Each experiment ran for 750 frames (60 s). The near condition used 1 m model separation, no divider, and $-72$ dBFS noise. The distant condition used 5.70 m separation, a 14 dB divider, and $-35$ dBFS noise. The conditions change several factors together and are not an acoustic ablation.
 
@@ -145,6 +147,13 @@ An optimized SGLang path required an isolated CUDA 13 runtime overlay and librar
 
 Successful transport did not imply clean synthesis. Warmup encountered a mask/embedding mismatch and fell back; the loader also warned that the SDPA Mimi fallback lacked intended sliding-window behavior. Later emitted audio substantially diverged from generated text and contained garbled phrases. These are candidate implementation causes, not proven causal explanations. Raon was therefore excluded from the showcase and is not certified here for long-form audio quality.
 
+\section{Extensibility of the virtual testbed}
+Each participant is an independent model session with its own streaming state and endpoint. The 3D view places these sessions in one shared scene, making simultaneous activity and different receiver mixtures visible. Noise, positions, dividers, and scenario presets enable controlled software experiments. Separate evaluator processes can run independent experiments with distinct ports and output directories; the current viewer does not provide a dashboard or scheduler for multiple concurrent scenes.
+
+Models with speaker-diarization or speaker-tracking capabilities are a natural extension: a compatible worker can consume a mixed microphone stream containing several sources. However, MuDuSi currently has no diarization-specific adapter contract, identity-tracking metric, or verified diarization-model result. Known simulator source IDs and emitted-audio caption labels are provenance annotations, not identities inferred from a mixture. Evaluating such models would require timestamped predicted speaker labels, a reference mapping from source activity to receiver time, and overlap-aware scoring. Extra spatial or multichannel inputs would also require extending the current mono PCM contract.
+
+The same testbed supplies acoustic trajectories and a trainer-controlled environment interface for RL development. Increasing the number of agents, vectorizing scenes, adding richer acoustics, and integrating model-internal policy actions remain separate engineering steps. The implemented three-slot scene and toy gate learner do not establish a general multi-scene SLM training platform.
+
 \section{From acoustic traces to SLM reinforcement learning}
 A gradient-capable learner needs model actions, not an ASR reconstruction of speech. The next interface must expose episode and agent identifiers, checkpoint revision, policy version, sampling configuration, input sample interval, sampled text/audio-code token IDs, token positions, behavior log-probabilities, valid-action masks, and token-to-emitted-sample alignment. Value estimates are needed when the selected learner uses a critic. Reset boundaries, recurrent/KV state, and truncation versus termination must also be explicit.
 
@@ -167,6 +176,7 @@ Re-execution requires independent model environments, authorized local model wei
 
 Audio conditioning and generated speech must respect model licenses and voice permissions. Label generated audio and caption provenance. A plausible transcript or confident synthetic voice does not establish factual correctness, as the cafe price error illustrates. Retain unselected trajectories and failure summaries alongside curated media so that favorable examples do not erase observed failures.
 
+\clearpage
 \bibliographystyle{plainnat}
-\bibliography{duplex-arena-technical-report}
+\bibliography{mudusi-technical-report}
 \end{document}

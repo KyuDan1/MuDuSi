@@ -1,5 +1,27 @@
 # Architecture and research plan
 
+## Virtual testbed and independent sessions
+
+MuDuSi lets independent model sessions interact in a virtual acoustic room before
+assembling a physical microphone/loudspeaker setup for each agent. This supports
+software experiments with multiple speakers, noise, positions, and occlusion;
+it does not replace real-device or room validation. Each agent keeps its own
+model state and receives its own microphone mixture. The 3D view visualizes these
+sessions together in one scene.
+
+Independent experiments can use separate evaluator processes, ports, and output
+directories. The current UI does not orchestrate or display multiple concurrent
+scenes in one dashboard. It implements three named agent slots, not arbitrary
+agent counts.
+
+A model capable of speaker diarization can in principle consume a multi-speaker
+receiver mixture through a compatible worker. Diarization-specific outputs,
+identity tracking, and scoring are not implemented or verified. Simulator source
+IDs and per-source ASR labels are known provenance, not inferred diarization.
+Adding that evaluation requires timestamped predicted labels, receiver-aligned
+reference activity, and overlap-aware metrics; multichannel inputs would need a
+new adapter contract beyond the current mono PCM stream.
+
 ## One simulation, two execution modes
 
 ```mermaid

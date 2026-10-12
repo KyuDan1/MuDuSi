@@ -247,7 +247,7 @@ def create_app(seed=42, scenario="roundtable", models=None, asr=None, replay=Non
         if session.asr:
             await session.asr.close()
 
-    app = FastAPI(title="Duplex Arena", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="MuDuSi — Multi-agent Duplex Simulator", version="0.1.0", lifespan=lifespan)
     app.state.session = session
 
     presentation = None
@@ -376,7 +376,9 @@ def create_app(seed=42, scenario="roundtable", models=None, asr=None, replay=Non
         finally:
             session.audio_observers[agent_id].discard(queue)
 
-    dist = Path(os.environ.get("DUPLEX_ARENA_WEB_DIR", Path.cwd() / "web" / "dist"))
+    dist = Path(os.environ.get(
+        "MUDUSI_WEB_DIR", os.environ.get("DUPLEX_ARENA_WEB_DIR", Path.cwd() / "web" / "dist")
+    ))
     if not dist.exists():
         dist = Path(__file__).resolve().parent.parent / "web" / "dist"
     if dist.exists():

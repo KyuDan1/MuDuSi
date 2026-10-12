@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#143d2d">
+    <meta name="description" content="MuDuSi is a virtual testbed for speech agents: visualize multi-agent conversations, vary acoustic scenes, and collect interaction trajectories before setting up physical hardware.">
+    <title>MuDuSi · Multi-agent Duplex Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="hero">
+      <div class="hero-inner">
+        <nav class="top-nav" aria-label="Main navigation">
+          <a class="home-link" href="https://kyudan1.github.io/">Kyudan Jung <span aria-hidden="true">↗</span></a>
+          <div><a href="#purpose">Overview</a><a href="#conversations">Conversations</a><a href="#start">Get started</a></div>
+        </nav>
+        <div class="hero-copy">
+          <h1>MuDuSi<span class="pronunciation">/ moo · doo · see /</span></h1>
+          <p class="expansion">Multi-agent Duplex Simulator</p>
+          <p class="hero-description">A virtual testbed for speech agents.<br class="desktop-break"> Test listening and speaking before setting up the hardware.</p>
+          <div class="hero-links"><a href="assets/mudusi-technical-report.pdf">Technical report <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi">Code &amp; documentation <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <div class="hero-bottom"><span>Full-duplex speech · Spatial acoustics · Multi-agent interaction</span><a href="#conversations">Listen to the conversations <span aria-hidden="true">↓</span></a></div>
+      </div>
+    </header>
+
+    <main id="main" class="page-frame">
+      <aside class="section-nav"><nav aria-label="On this page"><a href="#purpose">01 / The testbed</a><a href="#conversations">02 / Conversations</a><a href="#simulation">03 / Simulation</a><a href="#workflows">04 / Two workflows</a><a href="#start">05 / Get started</a></nav></aside>
+      <div class="content">
+        <section id="purpose" aria-labelledby="purpose-heading">
+          <p class="section-index">01 / The testbed</p>
+          <h2 id="purpose-heading">Build the interaction.<br>Then bring it into the room.</h2>
+          <p class="section-intro">Testing several speech agents normally means arranging speakers, microphones and a physical space. MuDuSi brings those early experiments into a shared virtual room, reducing the hardware setup needed to explore how agents listen, respond and speak over one another.</p>
+          <dl class="capabilities">
+            <div><dt>See multi-agent interaction</dt><dd>Watch independent speech models in 3D, with speaking and receiving activity, overlap, microphone levels and timing on one screen.</dd></div>
+            <div><dt>Change what agents hear</dt><dd>Move participants, vary microphone noise, add divider attenuation and compare quiet, interruption and cocktail-party scenes.</dd></div>
+            <div><dt>Inspect trajectories for RL research</dt><dd>Replay acoustic rollouts alongside audio, state, activity timelines and reward diagnostics; retain the evidence needed to develop model-side learning interfaces.</dd></div>
+            <div><dt>Run independent experiments</dt><dd>Use separate processes, ports, worker allocations and output folders for multiple sessions. Each viewer observes one experiment.</dd></div>
+          </dl>
+          <p class="side-note">Simulation supports early testing and controlled comparisons. Physical microphones, loudspeakers and room measurements remain important for deployment validation.</p>
+        </section>
+        <section id="conversations" aria-labelledby="conversations-heading">
+          <p class="section-index">02 / Conversations</p>
+          <h2 id="conversations-heading">Listen to a shared world.</h2>
+          <p class="section-intro">Each agent generates its own speech. The simulator carries that sound through the room into the other agents’ microphones, letting conversations unfold without assigned speaking turns.</p>
+          <figure class="conversation">
+            <div class="figure-heading"><h3>Two friends</h3><span>PersonaPlex + Moshi</span></div>
+            <video controls playsinline preload="none" poster="assets/two-friends.jpg" aria-label="Two friends: a conversation between PersonaPlex and Moshi"><source src="assets/two-friends.mp4" type="video/mp4">Your browser does not support embedded video. <a href="assets/two-friends.mp4">Download the conversation.</a></video>
+            <figcaption><span class="figure-number">Figure 1.</span> Two speech agents share a casual conversation. Their independently generated voices pass through the same acoustic simulation.</figcaption>
+          </figure>
+          <figure class="conversation">
+            <div class="figure-heading"><h3>At the coffee shop</h3><span>Two PersonaPlex agents</span></div>
+            <video controls playsinline preload="none" poster="assets/clerk-customer.jpg" aria-label="Coffee shop conversation between a PersonaPlex clerk and customer"><source src="assets/clerk-customer.mp4" type="video/mp4">Your browser does not support embedded video. <a href="assets/clerk-customer.mp4">Download the conversation.</a></video>
+            <figcaption><span class="figure-number">Figure 2.</span> Mia, the clerk, and Ben, the customer, discuss an iced oat latte and a croissant. The agents receive role and menu prompts; their dialogue is generated, not scripted.</figcaption>
+          </figure>
+          <figure class="conversation">
+            <div class="figure-heading"><h3>A three-way conversation</h3><span>Two PersonaPlex agents + Moshi</span></div>
+            <video controls playsinline preload="none" poster="assets/three-agents.jpg" aria-label="Three-way conversation between two PersonaPlex agents and Moshi"><source src="assets/three-agents.mp4" type="video/mp4">Your browser does not support embedded video. <a href="assets/three-agents.mp4">Download the conversation.</a></video>
+            <figcaption><span class="figure-number">Figure 3.</span> Three independent agents listen and speak in one room, including overlapping speech. The participants use two model families, with distinct voices for the two PersonaPlex instances.</figcaption>
+          </figure>
+          <p class="provenance">These are selected excerpts from actual model runs. Video audio mixes the agents’ emissions; speech bubbles replay offline ASR at word timestamps. Each agent’s spatially mixed receiver audio is saved separately. The clips illustrate interaction, not a conversation-quality benchmark.</p>
+        </section>
+
+        <section id="simulation" aria-labelledby="simulation-heading">
+          <p class="section-index">03 / Simulation</p>
+          <h2 id="simulation-heading">One room. Different microphones.</h2>
+          <p>The agents do not exchange text messages. They emit audio into a shared space, and each hears its own local mixture of the others. Moving an agent changes distance, attenuation and arrival time. Dividers, microphone noise and a simple wall reflection change what reaches each listener.</p>
+          <figure class="signal-flow">
+            <svg viewBox="0 0 760 180" role="img" aria-labelledby="flow-title flow-description">
+              <title id="flow-title">The acoustic interaction loop</title><desc id="flow-description">Speech models emit PCM audio into the spatial mixer. The mixer returns each agent's local microphone mixture as its next input.</desc>
+              <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs>
+              <rect x="1" y="42" width="210" height="88" rx="2"/><rect x="549" y="42" width="210" height="88" rx="2"/>
+              <text x="106" y="79" text-anchor="middle" class="diagram-title">Speech agents</text><text x="106" y="105" text-anchor="middle">Independent model workers</text>
+              <text x="654" y="79" text-anchor="middle" class="diagram-title">Acoustic space</text><text x="654" y="105" text-anchor="middle">Distance · delay · noise</text>
+              <path d="M 226 61 H 533" marker-end="url(#arrow)"/><path d="M 534 113 H 226" marker-end="url(#arrow)"/>
+              <text x="380" y="43" text-anchor="middle">Emitted PCM audio</text><text x="380" y="142" text-anchor="middle">Each agent’s local microphone</text>
+            </svg>
+            <figcaption>24 kHz audio, advanced in 80 ms frames. The previous receiver block becomes the next model input; acoustic propagation is resolved at the sample level.</figcaption>
+          </figure>
+          <p>The 3D viewer shows speech activity, received levels, overlap and timing. Recorded input and output WAVs, acoustic state and buffer diagnostics make the interaction inspectable after the GPU run ends. Different configurations can be compared through separate recorded sessions.</p>
+          <p class="side-note">The current acoustic model is deliberately lightweight: distance loss, divider attenuation, propagation delay, one wall reflection and independent microphone noise. It is not a measured room impulse response or a binaural renderer.</p>
+          <p class="side-note">Speaker diarization and audio-scene understanding depend on the connected model and any added task-specific adapters or evaluation code. The simulator supplies acoustic conditions and known source identities; its activity indicators are not inferred speaker labels or evidence of scene understanding.</p>
+        </section>
+
+        <section id="workflows" aria-labelledby="workflows-heading">
+          <p class="section-index">04 / Two workflows</p>
+          <h2 id="workflows-heading">Observe a conversation.<br>Keep the interaction.</h2>
+          <article class="workflow"><span class="workflow-number">A</span><div><h3>Inference &amp; evaluation</h3><p>Connect speech-model workers, set the room and run a bounded conversation. Inspect who spoke, what each agent heard, and whether audio arrived on time. Replay the resulting experiment in the browser without holding a GPU.</p><a href="https://github.com/KyuDan1/MuDuSi#1-run-conversations-and-evaluate-inference">Evaluation instructions <span aria-hidden="true">↗</span></a></div></article>
+          <article class="workflow"><span class="workflow-number">B</span><div><h3>Acoustic trajectory collection</h3><p>Use the same evaluator to retain synchronized source, receiver and model-input audio, per-frame state, acoustic rewards and transport diagnostics. These recordings support analysis and the development of future learning interfaces.</p><p class="side-note">Full speech-model RL is not implemented. Native inference traces do not yet include action tokens, behavior log-probabilities or policy-version barriers. A separate CPU example trains a small speak/listen gate with REINFORCE.</p><a href="https://github.com/KyuDan1/MuDuSi/blob/main/docs/SLM_TRAINING.md">Model-side learning requirements <span aria-hidden="true">↗</span></a></div></article>
+        </section>
+
+        <section id="start" aria-labelledby="start-heading">
+          <p class="section-index">05 / Get started</p>
+          <h2 id="start-heading">Run an experiment.</h2>
+          <p>Install the simulator and connect your model workers using the repository’s setup guide. PersonaPlex and Moshi need separate Python environments because both use the <code>moshi</code> package name.</p>
+          <div class="code-label">Record a conversation with running model workers</div>
+          <pre><code>mudusi evaluate \
+  --models configs/local-workers.json \
+  --seconds 60 --output runs/conversation</code></pre>
+          <div class="code-label">Replay the finished recording on CPU</div>
+          <pre><code>mudusi serve \
+  --replay runs/conversation --port 18766</code></pre>
+          <p>Open <code>http://localhost:18766/?showcase</code> for the presentation view. Word-timed speech bubbles require the optional offline ASR step. On the shared GPU cluster, launch model inference through the supplied Slurm scripts.</p>
+          <div class="reading-links"><a href="https://github.com/KyuDan1/MuDuSi">Installation &amp; examples <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi/blob/main/docs/SHOWCASE.md">Recording &amp; rendering <span aria-hidden="true">↗</span></a><a href="assets/mudusi-technical-report.pdf">Read the technical report <span aria-hidden="true">↗</span></a></div>
+        </section>
+        <section class="contribute" aria-labelledby="contribute-heading">
+          <h2 id="contribute-heading">Help shape the testbed.</h2>
+          <p>Contributions are welcome: speech-model adapters, acoustic scenes, evaluation tasks, trajectory tools and clearer visualizations. Share an experiment, report a limitation or propose an implementation.</p>
+          <div class="reading-links"><a href="https://github.com/KyuDan1/MuDuSi/issues">Discuss an idea or report an issue <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi/blob/main/CONTRIBUTING.md">Contribution guide <span aria-hidden="true">↗</span></a></div>
+        </section>
+        <footer class="page-footer"><a href="https://kyudan1.github.io/">Kyudan Jung</a><span>MuDuSi · Multi-agent Duplex Simulator</span><a href="#top" id="back-to-top">Back to top ↑</a></footer>
+      </div>
+    </main>
+    <div class="watercolor-footer" aria-hidden="true"></div>
+  </body>
+</html>

@@ -6,7 +6,7 @@ Install the optional backend and run the server with an observer:
 
 ```sh
 pip install -e '.[asr]'
-duplex-arena serve --asr-model tiny --asr-device cpu --asr-agent moshi
+mudusi serve --asr-model tiny --asr-device cpu --asr-agent moshi
 ```
 
 Model startup may download weights. CPU uses INT8; CUDA uses FP16. GPU ASR needs a compatible faster-whisper/CTranslate2 CUDA environment and additional GPU memory. The ASR option is off by default. The base simulator does not import its optional dependencies.

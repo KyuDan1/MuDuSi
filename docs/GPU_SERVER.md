@@ -19,7 +19,7 @@ not a cross-hardware or conversation-quality benchmark.
 
 ## 1. Install the arena
 
-From your clone of Duplex Arena, use Python 3.12 for broad model-package
+From your clone of MuDuSi, use Python 3.12 for broad model-package
 compatibility and a recent Node LTS to build the viewer:
 
 ```bash
@@ -117,7 +117,7 @@ still have the upstream behavior. See the [upstream server implementation](https
 ## 4. Connect and open the arena
 
 ```bash
-.venv/bin/duplex-arena serve --host 127.0.0.1 --port 8765 \
+.venv/bin/mudusi serve --host 127.0.0.1 --port 8765 \
   --models configs/workers.example.json
 ```
 

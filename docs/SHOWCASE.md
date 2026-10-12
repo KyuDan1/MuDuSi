@@ -117,8 +117,8 @@ recording time, and the cinematic canvas renders only when that time changes.
 Join finished clips and validate both audio/video streams:
 
 ```bash
-sbatch workers/package_video.sbatch --output output/duplex-arena-introduction.mp4 \
-  output/duplex-arena-two-agents.mp4 output/duplex-arena-three-agents.mp4
+sbatch workers/package_video.sbatch --output output/mudusi-introduction.mp4 \
+  output/mudusi-two-agents.mp4 output/mudusi-three-agents.mp4
 ```
 
 The package sidecar records the input clips and full-stream decode results.
@@ -139,7 +139,7 @@ sbatch --gres=gpu:2 --mem=96G workers/conversation.sbatch \
 sbatch workers/asr_gpu.sbatch runs/cafe-customer
 # Choose a coherent interval after checking its ASR and audio:
 sbatch --cpus-per-task=16 workers/render.sbatch \
-  --recording runs/cafe-customer --output output/duplex-arena-cafe.mp4 \
+  --recording runs/cafe-customer --output output/mudusi-cafe.mp4 \
   --start 9.5 --seconds 20.75 --fps 24 \
   --title 'At the coffee shop.' --subtitle 'CAFE CLERK + CUSTOMER / PERSONAPLEX'
 ```
@@ -160,7 +160,7 @@ manifest lists `segments` of `{"kind":"card","path":"...png","seconds":3}` or
 
 ```bash
 sbatch workers/edit_film.sbatch --manifest configs/film.example.json \
-  --output output/duplex-arena-introduction-en.mp4
+  --output output/mudusi-introduction-en.mp4
 ```
 
 The intended sequence is title → friends chapter → friends conversation →
@@ -194,15 +194,15 @@ Render the selected clips with the current UI before composing the film:
 
 ```bash
 sbatch --cpus-per-task=16 workers/render.sbatch \
-  --recording runs/showcase-2 --output output/duplex-arena-two-agents-en.mp4 \
+  --recording runs/showcase-2 --output output/mudusi-two-agents-en.mp4 \
   --start 0 --seconds 26.92 --fps 24 \
   --title 'Two friends' --subtitle 'PersonaPlex + Moshi'
 sbatch --cpus-per-task=16 workers/render.sbatch \
-  --recording runs/cafe-customer --output output/duplex-arena-cafe-en.mp4 \
+  --recording runs/cafe-customer --output output/mudusi-cafe-en.mp4 \
   --start 9.5 --seconds 20.75 --fps 24 \
   --title 'Clerk and customer' --subtitle 'Two PersonaPlex agents at a coffee shop'
 sbatch --cpus-per-task=16 workers/render.sbatch \
-  --recording runs/showcase-3 --output output/duplex-arena-three-agents-en.mp4 \
+  --recording runs/showcase-3 --output output/mudusi-three-agents-en.mp4 \
   --start 0 --seconds 14.92 --fps 24 \
   --title 'Three-way conversation' --subtitle 'Two PersonaPlex agents + Moshi'
 ```

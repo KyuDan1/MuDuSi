@@ -151,7 +151,7 @@ export default function MatrixShowcase() {
   if (!data) return <div className="matrix-loading">{error || "Loading nine recorded rooms…"}</div>;
   const room = data.rooms[focus];
   return <main className="matrix-showcase">
-    <header className="matrix-header"><div><h1>Nine rooms. Eighteen voices.</h1><p>MuDuSi · All ordered pairs of Moshi, PersonaPlex and Raon</p></div><div className="matrix-clock"><strong>{time.toFixed(2)}<small> s</small></strong><span>24 kHz PCM · 80 ms ticks</span>{data.concurrency?.completed && data.concurrency.simultaneous_room_count === 9 && <span>9 concurrent rooms · {data.concurrency.start_spread_ms?.toFixed(1)} ms start spread</span>}</div></header>
+    <header className="matrix-header"><div><h1>Nine rooms. Eighteen voices.</h1><p>MuDuSi · All ordered pairs of Moshi, PersonaPlex and Raon</p></div><div className="matrix-clock"><strong>{time.toFixed(2)}<small> s</small></strong><span>Simulation time · 80 ms audio ticks</span>{data.concurrency?.completed && data.concurrency.simultaneous_room_count === 9 && <span>9 concurrent rooms · {data.concurrency.start_spread_ms?.toFixed(1)} ms start spread</span>}</div></header>
     <div className="matrix-axis"><span>LEFT ↓ / RIGHT →</span>{data.model_order.map(name => <b key={name}>{name}</b>)}</div>
     <section className="matrix-board" aria-label="Nine independent acoustic rooms">
       <Canvas className="matrix-canvas" frameloop="demand" dpr={1} gl={{ antialias: true, alpha: true }}><View.Port /><RenderPulse time={time} focus={focus} /></Canvas>

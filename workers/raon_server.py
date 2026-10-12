@@ -91,11 +91,19 @@ def main():
                         help="SGLang static GPU-memory budget fraction; includes its model/cache")
     parser.add_argument("--max-total-tokens", type=positive_int,
                         help="Optional SGLang KV token-capacity cap; must cover the full episode")
+    parser.add_argument("--max-running-requests", type=positive_int,
+                        help="Optional SGLang request-pool capacity and graph batch-size bound")
+    parser.add_argument("--max-allocated-req-pool-indices", type=positive_int,
+                        help="Optional Raon request-slot allocation limit; cannot exceed running requests")
     parser.add_argument("--compile-audio-modules", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--disable-cuda-graph", action="store_true")
     parser.add_argument("--mimi-sdpa-window", action="store_true",
                         help="Apply a process-local Mimi sliding-window mask fix for SDPA/eager")
     args = parser.parse_args()
+    if (args.max_running_requests is not None
+            and args.max_allocated_req_pool_indices is not None
+            and args.max_allocated_req_pool_indices > args.max_running_requests):
+        parser.error("--max-allocated-req-pool-indices cannot exceed --max-running-requests")
     sys.path.insert(0, str(Path(args.source).resolve()))
     os.environ.setdefault("SGLANG_ENABLE_JIT_DEEPGEMM", "0")
     import uvicorn
@@ -114,6 +122,10 @@ def main():
                "mem_fraction_static": args.mem_fraction_static}
     if args.max_total_tokens is not None:
         runtime["max_total_tokens"] = args.max_total_tokens
+    for key in ("max_running_requests", "max_allocated_req_pool_indices"):
+        value = getattr(args, key)
+        if value is not None:
+            runtime[key] = value
     # Canonical upstream prompts preserve the intended listen/speak mode. A
     # custom prompt is separate conditioning, not a script for emitted speech.
     prompt = args.prompt or f"eng:full_duplex:{'speak-first' if args.speak_first else 'listen-first'}"

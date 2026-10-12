@@ -46,13 +46,32 @@ The batch requests **6 GPUs, 48 CPUs, 512 GiB RAM, and 35 minutes**, using `extr
 
 The runner checks ports before launching, waits for all surviving rooms' adapter readiness, then releases an in-process start barrier. Startup conditioning may produce audio before release; evaluation summaries preserve the startup counters. A room that fails readiness does not strand the others. The overall exit status is nonzero unless all nine rooms finish. Startup/cleanup are bounded, and cancellation terminates the runner's own worker process groups. There is no worker attach, external control channel, or NAS-based live coordination.
 
+## Protected four-GPU alternative
+
+When the six-GPU `extra` allocation cannot start, `configs/matrix.four-gpu.json` keeps all nine ordered rooms and eighteen independent model processes within a four-GPU allocation. GPUs 0–3 hold **5, 5, 4, and 4 processes**, respectively. Model-family totals remain six Moshi, six PersonaPlex, and six Raon instances; each room still owns its two distinct endpoints and model states.
+
+For a `sub` account, explicitly override the batch defaults to use the protected four-GPU `own` quota:
+
+```bash
+export MUDUSI_ENV_FILE="$PWD/work/server.env"
+sbatch --qos=own --gres=gpu:4 --cpus-per-gpu=12 --mem=512G \
+  workers/matrix.sbatch --config configs/matrix.four-gpu.json \
+  --output runs/matrix-four-gpu
+```
+
+This requests 48 CPUs in total and retains the script's 35-minute limit. Availability within the user's own quota still determines when it starts. Cancelling a pending `extra` submission to choose this configuration is a scheduling change, not a failed inference experiment.
+
+The four-GPU configuration uses **0.25× pacing**: 60 simulation/audio seconds require approximately **240 wall-clock seconds**, excluding model startup and cleanup. All nine conversations remain concurrent. Normal 24 kHz PCM and replay speed are unchanged; this run must not be reported as real-time inference.
+
+Raon's explicit limits are `max_total_tokens=8192`, `max_running_requests=4`, and `max_allocated_req_pool_indices=4`, alongside `mem_fraction_static=0.85`. The fraction participates in the runtime's available-memory budget calculation; with the explicit token cap it does **not** mean each process allocates 85% of the GPU. For this bounded 60-second rollout, the expected generated-token budget is at most 2,250 positions plus prompt conditioning, within the 8,192-position cap. The estimated KV cache at that cap is approximately **1.125 GiB per Raon process**, separate from weights, codec, runtime workspaces, and other allocations. Total VRAM consumption and pacing under the denser placement still require measurement; these settings alone are not proof that the workload fits or produces healthy audio.
+
 ## Simulation time versus wall-clock pacing
 
 `playback_rate` is simulation seconds per wall-clock second and must be in `(0, 1]`. With the example's rate of 0.5, a 60-second, 750-frame conversation runs for about 120 wall-clock seconds, excluding startup and cleanup. All nine rooms still run concurrently behind the same readiness barrier. Model instances, room separation, and the three-models-per-GPU placement remain unchanged.
 
 The audio format stays **24 kHz mono**, with **1,920 samples per 80 ms simulation tick**. Slower input pacing does not resample audio, stretch voices, or add a silence block between recorded frames. Replay and exported videos use the normal audio/simulation timeline. A 60-second video therefore presents 60 seconds of generated audio, while the inference job took about 120 seconds to collect it. Keep that distinction visible in published timing claims.
 
-The manifest and `matrix.json` record `playback_rate`, `simulation_seconds`/`seconds`, and `target_wall_seconds`; room summaries record actual wall time. At 0.5×, a wall/audio ratio near 2 is intentional. Compare startup and sustained buffer counters separately and review the resulting audio: relaxed pacing alone does not establish good dialogue or remove every underrun.
+The manifest and `matrix.json` record `playback_rate`, `simulation_seconds`/`seconds`, and `target_wall_seconds`; room summaries record actual wall time. At 0.5×, a wall/audio ratio near 2 is intentional. The four-GPU configuration instead targets a wall/audio ratio near 4. Compare startup and sustained buffer counters separately and review the resulting audio: relaxed pacing alone does not establish good dialogue or remove every underrun.
 
 ## Verify the experiment
 

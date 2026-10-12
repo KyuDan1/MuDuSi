@@ -33,6 +33,29 @@ def test_ordered_pairs_have_independent_endpoints_and_balanced_devices(configura
     assert configuration["room"]["agents"][2]["muted"] is True
 
 
+def test_four_gpu_plan_preserves_all_pairs_and_caps_raon_memory(monkeypatch, tmp_path):
+    config = json.loads(Path("configs/matrix.four-gpu.json").read_text())
+    plan = run_matrix.make_plan(config, tmp_path)
+    assert len(plan["rooms"]) == 9 and len(plan["workers"]) == 18
+    assert {(r["left"], r["right"]) for r in plan["rooms"]} == set(
+        itertools.product(config["families"], repeat=2))
+    assert len({w["port"] for w in plan["workers"]}) == 18
+    assert Counter(w["gpu"] for w in plan["workers"]) == {0: 5, 1: 5, 2: 4, 3: 4}
+    assert Counter(w["family"] for w in plan["workers"]) == {
+        "raon": 6, "moshi": 6, "personaplex": 6}
+    assert plan["playback_rate"] == .25 and plan["target_wall_seconds"] == 240
+    monkeypatch.setenv("RAON_SOURCE", "/example/source")
+    monkeypatch.setenv("RAON_BUNDLE", "/example/bundle")
+    worker = next(w for w in plan["workers"] if w["family"] == "raon")
+    command = run_matrix.worker_command(worker, config)
+    for flag, value in {"--mem-fraction-static": "0.85", "--max-total-tokens": "8192",
+                        "--max-running-requests": "4", "--max-allocated-req-pool-indices": "4"}.items():
+        assert command[command.index(flag) + 1] == value
+    assert "--mimi-sdpa-window" in command
+    native = next(w for w in plan["workers"] if w["family"] == "moshi")
+    assert "--max-total-tokens" not in run_matrix.worker_command(native, config)
+
+
 @pytest.mark.parametrize("change", [{"families": ["raon"] * 3}, {"port_start": 65520}, {"seconds": float("nan")},
                                   {"playback_rate": 0}, {"playback_rate": 1.1}, {"playback_rate": float("nan")}])
 def test_invalid_plan_is_rejected_before_launch(configuration, tmp_path, change):

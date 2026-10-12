@@ -1,0 +1,93 @@
+{
+  "families": [
+    "moshi",
+    "personaplex",
+    "raon"
+  ],
+  "seconds": 60,
+  "seed": 42,
+  "scenario": "quiet",
+  "port_start": 18000,
+  "startup_batch_size": 4,
+  "startup_timeout_seconds": 1200,
+  "session_startup_timeout_seconds": 600,
+  "monitor_interval_seconds": 5,
+  "gpu_assignment": {
+    "raon": [
+      0,
+      1,
+      2,
+      3,
+      0,
+      1
+    ],
+    "moshi": [
+      0,
+      0,
+      1,
+      1,
+      2,
+      3
+    ],
+    "personaplex": [
+      0,
+      1,
+      2,
+      2,
+      3,
+      3
+    ]
+  },
+  "personaplex": {
+    "left": {
+      "voice_prompt": "NATF2.pt",
+      "text_prompt": "You are Alex, a friendly person chatting with a friend. Start the conversation by asking what they would like to do this weekend. Speak in brief natural English turns, one sentence at a time. Listen to their answer, respond to what they actually say, and ask short follow-up questions. Give your friend time to speak."
+    },
+    "right": {
+      "voice_prompt": "NATM1.pt",
+      "text_prompt": "You are Sam, a friendly person chatting with a friend. Let your friend open the conversation and respond naturally to what they actually say. You enjoy cafes, parks and weekend outings. Speak in brief natural English turns, one sentence at a time, and give your friend time to speak."
+    }
+  },
+  "room": {
+    "noise_db": -72,
+    "reverb": 0.06,
+    "agents": [
+      {
+        "id": "persona",
+        "position": [
+          -1.25,
+          1.2,
+          0
+        ],
+        "muted": false
+      },
+      {
+        "id": "moshi",
+        "position": [
+          1.25,
+          1.2,
+          0
+        ],
+        "muted": false
+      },
+      {
+        "id": "custom",
+        "position": [
+          0,
+          1.2,
+          2.1
+        ],
+        "muted": true
+      }
+    ]
+  },
+  "gpu_count": 4,
+  "raon": {
+    "mimi_sdpa_window": true,
+    "mem_fraction_static": 0.85,
+    "max_total_tokens": 8192,
+    "max_running_requests": 4,
+    "max_allocated_req_pool_indices": 4
+  },
+  "playback_rate": 0.25
+}

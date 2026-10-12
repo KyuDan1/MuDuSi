@@ -97,10 +97,14 @@ def make_plan(config, output):
 def worker_command(worker, config=None):
     args = ["bash", f"workers/launch_{worker['family']}.sh", str(worker["gpu"]), str(worker["port"])]
     if worker["family"] == "raon":
+        options = (config or {}).get("raon", {})
         args += [os.environ["RAON_SOURCE"], os.environ["RAON_BUNDLE"],
-                 "--mem-fraction-static", "0.30",
+                 "--mem-fraction-static", str(options.get("mem_fraction_static", "0.30")),
                  "--speak-first" if worker["side"] == "left" else "--no-speak-first"]
-        if (config or {}).get("raon", {}).get("mimi_sdpa_window", False):
+        for name in ("max_total_tokens", "max_running_requests", "max_allocated_req_pool_indices"):
+            if name in options:
+                args += ["--" + name.replace("_", "-"), str(options[name])]
+        if options.get("mimi_sdpa_window", False):
             args.append("--mimi-sdpa-window")
     return args
 

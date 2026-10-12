@@ -44,7 +44,9 @@ mudusi serve --scenario quiet --port 8765
 mudusi serve --scenario cocktail --port 8766
 ```
 
-For concurrent real-model experiments, allocate separate worker sessions/endpoints, adequate GPU resources, and distinct recording directories. The native reference servers serialize sessions, so reusing one endpoint does not create independent concurrent agents. There is no built-in multi-experiment dashboard or vectorized rollout scheduler; use separate processes or batch jobs and replay their outputs.
+For concurrent real-model experiments, allocate separate worker sessions/endpoints, adequate GPU resources, and distinct recording directories. The native reference servers serialize sessions, so reusing one endpoint does not create independent concurrent agents.
+
+The [nine-room matrix runner](docs/MATRIX.md) runs all ordered pairs of Moshi, PersonaPlex, and Raon with 18 independent model processes. Its example shares each GPU among three models and synchronizes the nine acoustic engines with one start barrier. Replay the recordings in a 3×3 dashboard with face-to-face agents, a common clock, captions, and selectable room audio. This bounded inference runner does not implement a vectorized RL training scheduler.
 
 ### See what an RL policy experienced
 

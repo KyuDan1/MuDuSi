@@ -47,6 +47,7 @@ def main():
     serve.add_argument("--scenario", default="roundtable", choices=["roundtable", "interruption", "cocktail", "quiet"])
     serve.add_argument("--models", help="JSON worker configuration; omit for a GPU-free synthetic demo")
     serve.add_argument("--replay", help="Replay a completed evaluation directory without contacting GPU workers")
+    serve.add_argument("--matrix", help="Replay nine isolated paired recordings from a matrix experiment")
     serve.add_argument("--asr-model", help="Optional faster-whisper model, e.g. tiny; downloads weights on first use")
     serve.add_argument("--asr-device", default="cpu", choices=["cpu", "cuda"])
     serve.add_argument("--asr-agent", default="moshi", choices=["persona", "moshi", "custom"])
@@ -61,6 +62,12 @@ def main():
     if args.command == "serve":
         import uvicorn
         from .server import create_app
+        if args.matrix:
+            if args.models or args.replay or args.asr_model:
+                parser.error("--matrix cannot combine with --models, --replay, or --asr-model")
+            from .matrix import create_matrix_app
+            uvicorn.run(create_matrix_app(args.matrix), host=args.host, port=args.port)
+            return
         observer = None
         if args.asr_model:
             from .asr import ASRObserver

@@ -65,6 +65,7 @@ function Robot({
   caption,
   cinematic = false,
   time,
+  yaw = 0,
 }: {
   agent: Agent;
   selected: boolean;
@@ -74,6 +75,7 @@ function Robot({
   caption?: string;
   cinematic?: boolean;
   time?: number;
+  yaw?: number;
 }) {
   const robot = useRef<THREE.Group>(null);
   const color = colorOf(agent);
@@ -117,6 +119,7 @@ function Robot({
       </mesh>
       <group
         ref={robot}
+        rotation={[0, yaw, 0]}
         onClick={(e) => {
           e.stopPropagation();
           onSelect();
@@ -369,6 +372,7 @@ function Scene({
   cameraKey,
   cinematic = false,
   captions = {},
+  faceToFace = false,
 }: {
   state: Snapshot;
   selected: string;
@@ -378,6 +382,7 @@ function Scene({
   cameraKey: number;
   cinematic?: boolean;
   captions?: Record<string, string>;
+  faceToFace?: boolean;
 }) {
   const { camera, invalidate } = useThree();
   useEffect(() => { if (cinematic) invalidate(); }, [cinematic, state.time, invalidate]);
@@ -544,6 +549,12 @@ function Scene({
           caption={captions[agent.id]}
           cinematic={cinematic}
           time={cinematic ? state.time : undefined}
+          yaw={faceToFace && state.agents.length === 2
+            ? Math.atan2(
+                state.agents.find((other) => other.id !== agent.id)!.position[0] - agent.position[0],
+                state.agents.find((other) => other.id !== agent.id)!.position[2] - agent.position[2],
+              )
+            : 0}
         />
       ))}
       <ContactShadows
@@ -634,6 +645,7 @@ export default function Arena(props: {
   cameraKey: number;
   cinematic?: boolean;
   captions?: Record<string, string>;
+  faceToFace?: boolean;
 }) {
   const hasGL = useMemo(() => {
     try {

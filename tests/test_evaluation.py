@@ -75,3 +75,34 @@ def test_live_startup_failure_is_saved_and_raised(tmp_path):
         asyncio.run(evaluate_live(config, tmp_path / "run", seconds=.08))
     summary = json.loads((tmp_path / "run/summary.json").read_text())
     assert not summary["completed"] and summary["error"] and summary["frames"] == 0
+
+
+def test_nine_live_rooms_share_start_barrier_and_keep_receiver_history(tmp_path):
+    async def run():
+        gate = asyncio.Event()
+        ready = []
+
+        async def barrier():
+            ready.append(True)
+            if len(ready) == 9:
+                gate.set()
+            await gate.wait()
+
+        async with serve(echo_session, "127.0.0.1", 0) as server:
+            config = tmp_path / "workers.json"
+            config.write_text(json.dumps({"agents": [{"id": "moshi", "backend": "pcm",
+                "url": f"ws://127.0.0.1:{server.sockets[0].getsockname()[1]}/stream"}]}))
+            results = await asyncio.gather(*(evaluate_live(config, tmp_path / str(i),
+                seconds=.16, seed=i, scenario="cocktail", start_barrier=barrier) for i in range(9)))
+        starts = [r["wall_start_utc"] for r in results]
+        assert max(starts) - min(starts) < .08
+        assert all(r["completed"] and r["frames"] == 2 for r in results)
+        received = []
+        for i in range(9):
+            pcm = read_pcm(tmp_path / str(i) / "moshi-received.wav")
+            inputs = read_pcm(tmp_path / str(i) / "moshi-input.wav")
+            np.testing.assert_array_equal(inputs[:1920], 0)
+            np.testing.assert_array_equal(inputs[1920:], pcm[:-1920])
+            received.append(pcm)
+        assert all(not np.array_equal(received[0], pcm) for pcm in received[1:])
+    asyncio.run(run())

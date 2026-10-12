@@ -11,7 +11,7 @@ import numpy as np
 from .server import Session, IDS
 
 
-async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", configuration=None):
+async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", configuration=None, *, start_barrier=None):
     if not math.isfinite(seconds) or not 0 < seconds <= 3600:
         raise ValueError("seconds must be in (0, 3600]")
     root = Path(output)
@@ -22,6 +22,9 @@ async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", c
         session.engine.configure(**configuration)
     writers = {}
     started = None
+    wall_start_utc = None
+    pre_barrier_worker_stats = {}
+    startup_worker_stats = {}
     frames = 0
     lateness = []
     failure = None
@@ -32,6 +35,11 @@ async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", c
                 writer = wave.open(str(root / f"{key}-{kind}.wav"), "wb")
                 writer.setparams((1, 2, 24000, 0, "NONE", "not compressed"))
                 writers[key, kind] = writer
+        pre_barrier_worker_stats = {key: dict(adapter.stats) for key, adapter in session.adapters.items()}
+        if start_barrier is not None:
+            await start_barrier()
+        startup_worker_stats = {key: dict(adapter.stats) for key, adapter in session.adapters.items()}
+        wall_start_utc = time.time()
         started = time.perf_counter()
         with (root / "trace.jsonl").open("w") as trace:
             for tick in range(session.engine.horizon):
@@ -60,7 +68,9 @@ async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", c
         elapsed = time.perf_counter() - started if started else 0
         state = session.snapshot()
         summary = {"schema_version": 1, "mode": "live", "completed": failure is None,
-                   "error": failure, "frames": frames, "seconds": frames * .08,
+                   "error": failure, "wall_start_utc": wall_start_utc, "wall_end_utc": time.time(),
+                   "pre_barrier_worker_stats": pre_barrier_worker_stats,
+                   "startup_worker_stats": startup_worker_stats, "frames": frames, "seconds": frames * .08,
                    "wall_seconds": elapsed, "wall_per_audio_second": elapsed / (frames * .08) if frames else None,
                    "deadline_lateness_p95_ms": float(np.percentile(lateness, 95) * 1000) if lateness else None,
                    "seed": seed, "scenario": scenario, "sample_rate": 24000,

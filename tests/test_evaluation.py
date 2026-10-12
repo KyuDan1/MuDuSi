@@ -106,3 +106,20 @@ def test_nine_live_rooms_share_start_barrier_and_keep_receiver_history(tmp_path)
             received.append(pcm)
         assert all(not np.array_equal(received[0], pcm) for pcm in received[1:])
     asyncio.run(run())
+
+
+def test_slow_collection_preserves_pcm_and_simulation_duration(tmp_path):
+    async def run():
+        async with serve(echo_session, "127.0.0.1", 0) as server:
+            config = tmp_path / "workers.json"
+            config.write_text(json.dumps({"agents": [{"id": "moshi", "backend": "pcm",
+                "url": f"ws://127.0.0.1:{server.sockets[0].getsockname()[1]}/stream"}]}))
+            result = await evaluate_live(config, tmp_path / "slow", seconds=.16, playback_rate=.5)
+            assert result["seconds"] == .16 and result["frames"] == 2
+            assert result["wall_seconds"] >= .32
+            assert result["playback_rate"] == .5 and result["wall_tick_ms"] == 160
+            received = read_pcm(tmp_path / "slow/moshi-received.wav")
+            inputs = read_pcm(tmp_path / "slow/moshi-input.wav")
+            assert len(inputs) == 3840
+            np.testing.assert_array_equal(inputs[1920:], received[:-1920])
+    asyncio.run(run())

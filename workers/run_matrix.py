@@ -40,6 +40,9 @@ def make_plan(config, output):
     seconds = config.get("seconds", 60)
     if not isinstance(seconds, (int, float)) or not math.isfinite(seconds) or not 0 < seconds <= 3600:
         raise ValueError("seconds must be finite and in (0, 3600]")
+    playback_rate = config.get("playback_rate", 1.0)
+    if not isinstance(playback_rate, (int, float)) or not math.isfinite(playback_rate) or not 0 < playback_rate <= 1:
+        raise ValueError("playback_rate must be finite and in (0, 1]")
     port = config.get("port_start", 18000)
     if not isinstance(port, int) or not 1024 <= port <= 65518:
         raise ValueError("port_start must leave room for 18 unprivileged ports")
@@ -84,7 +87,8 @@ def make_plan(config, output):
                       "output": str(Path(output) / room_id), "agents": agents,
                       "workers": room_workers, "status": "planned"})
     return {"schema_version": 1, "experiment": "simultaneous_ordered_pair_matrix",
-            "family_order": families, "seconds": seconds, "room_count": 9,
+            "family_order": families, "seconds": seconds, "playback_rate": playback_rate,
+            "target_wall_seconds": seconds / playback_rate, "room_count": 9,
             "participant_count": 18, "workers": workers, "rooms": rooms,
             "configuration": config, "stimulus": "none; only model emissions and microphone noise",
             "isolation": "distinct process, endpoint and session per participant; distinct acoustic engine per room"}
@@ -171,6 +175,8 @@ async def experiment(config, root):
             write_json(directory / "configuration.json", config["room"])
             write_json(directory / "manifest.json", {"matrix_job": manifest["job_id"],
                 "matrix_room": room["id"], "agents": room["agents"], "stimulus": manifest["stimulus"],
+                "playback_rate": manifest["playback_rate"], "simulation_seconds": manifest["seconds"],
+                "target_wall_seconds": manifest["target_wall_seconds"],
                 "arena_commit": manifest["arena_commit"], "workers": [w for w in manifest["workers"] if w["room"] == room["id"]]})
         # Initialize Raon first, in small batches; native models follow, also batched.
         boot_order = sorted(manifest["workers"], key=lambda w: w["family"] != "raon")
@@ -231,7 +237,7 @@ async def experiment(config, root):
                 result = await evaluate_live(Path(room["output"]) / "workers.json", room["output"],
                     seconds=manifest["seconds"], seed=config.get("seed", 42),
                     scenario=config.get("scenario", "quiet"), configuration=config["room"],
-                    start_barrier=ready)
+                    start_barrier=ready, playback_rate=manifest["playback_rate"])
                 room.update(status="completed", frames=result["frames"], summary="summary.json")
             except Exception as exc:
                 room.update(status="failed", error=f"{type(exc).__name__}: {exc}")
@@ -295,6 +301,9 @@ async def experiment(config, root):
             "wall_start_utc": manifest.get("barrier_release", {}).get("utc"),
             "wall_end_utc": manifest["ended"]["utc"],
             "start_spread_ms": manifest.get("start_spread_ms"),
+            "playback_rate": manifest["playback_rate"],
+            "simulation_seconds": manifest["seconds"],
+            "target_wall_seconds": manifest["target_wall_seconds"],
             "completed": manifest["status"] == "completed",
             "completed_rooms": manifest.get("completed_rooms", 0),
             "simultaneous_room_count": manifest.get("simultaneous_room_count", 0),
@@ -308,6 +317,7 @@ def main():
     parser.add_argument("--output", required=True)
     parser.add_argument("--seconds", type=float, help="Override the configured duration for all rooms")
     parser.add_argument("--gpus", type=int, help="Override the expected allocation size; assignments stay explicit")
+    parser.add_argument("--playback-rate", type=float, help="Simulation seconds per wall second, in (0, 1]")
     parser.add_argument("--plan", action="store_true", help="Print the validated plan without launching processes")
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text())
@@ -315,6 +325,8 @@ def main():
         config["seconds"] = args.seconds
     if args.gpus is not None:
         config["gpu_count"] = args.gpus
+    if args.playback_rate is not None:
+        config["playback_rate"] = args.playback_rate
     if args.plan:
         print(json.dumps(make_plan(config, args.output), indent=2))
         return

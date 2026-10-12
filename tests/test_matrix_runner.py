@@ -21,6 +21,8 @@ def test_ordered_pairs_have_independent_endpoints_and_balanced_devices(configura
     plan = run_matrix.make_plan(configuration, tmp_path)
     assert [(r["left"], r["right"]) for r in plan["rooms"]] == list(
         itertools.product(configuration["families"], repeat=2))
+    assert plan["playback_rate"] == 0.5
+    assert plan["target_wall_seconds"] == 2 * plan["seconds"]
     workers = plan["workers"]
     assert len({w["id"] for w in workers}) == len({w["port"] for w in workers}) == 18
     for gpu in range(6):
@@ -31,7 +33,8 @@ def test_ordered_pairs_have_independent_endpoints_and_balanced_devices(configura
     assert configuration["room"]["agents"][2]["muted"] is True
 
 
-@pytest.mark.parametrize("change", [{"families": ["raon"] * 3}, {"port_start": 65520}, {"seconds": float("nan")}])
+@pytest.mark.parametrize("change", [{"families": ["raon"] * 3}, {"port_start": 65520}, {"seconds": float("nan")},
+                                  {"playback_rate": 0}, {"playback_rate": 1.1}, {"playback_rate": float("nan")}])
 def test_invalid_plan_is_rejected_before_launch(configuration, tmp_path, change):
     configuration.update(change)
     with pytest.raises(ValueError):
@@ -72,6 +75,7 @@ def test_barrier_waits_for_all_surviving_rooms_and_failure_is_isolated(
         await stop.wait()
 
     async def evaluate(models, output, *, start_barrier, **kwargs):
+        assert kwargs["playback_rate"] == 0.5
         name = Path(output).name
         if fail_one_room and name == "raon-raon":
             raise RuntimeError("Deliberate isolated readiness failure")
@@ -101,4 +105,6 @@ def test_barrier_waits_for_all_surviving_rooms_and_failure_is_isolated(
     assert len(matrix["rooms"]) == 9
     assert matrix["rooms"][0]["directory"] == "moshi-moshi"
     assert matrix["start_spread_ms"] is not None
+    assert matrix["playback_rate"] == 0.5
+    assert matrix["target_wall_seconds"] == 2 * matrix["simulation_seconds"]
     assert len(processes) == 18 and all(p.returncode == 0 for p in processes)

@@ -34,7 +34,7 @@ def load_matrix(directory):
             "model_order": manifest.get("model_order", ["Moshi", "PersonaPlex", "Raon"]),
             "rooms": rooms, "concurrency": {key: manifest.get(key) for key in (
                 "job_id", "wall_start_utc", "wall_end_utc", "start_spread_ms",
-                "completed", "completed_rooms", "simultaneous_room_count")},
+                "completed", "completed_rooms", "simultaneous_room_count", "playback_rate")},
             "audio_kind": "One selected room at a time; rooms never hear other rooms"}, audio
 
 

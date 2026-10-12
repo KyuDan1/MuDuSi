@@ -68,6 +68,7 @@ def check_room(directory, record, errors):
     require(set(final_agents) == {"persona", "moshi", "custom"}, "unexpected scene agent IDs")
     result = {"completed": summary.get("completed"), "frames": frames,
               "seconds": summary.get("seconds"), "wall_seconds": summary.get("wall_seconds"),
+              "playback_rate": summary.get("playback_rate", 1), "wall_tick_ms": summary.get("wall_tick_ms", 80),
               "wall_per_audio_second": summary.get("wall_per_audio_second"),
               "wall_start_utc": summary.get("wall_start_utc"), "wall_end_utc": summary.get("wall_end_utc"),
               "summary_deadline_lateness_p95_ms": summary.get("deadline_lateness_p95_ms"),
@@ -85,7 +86,7 @@ def check_room(directory, record, errors):
     late = [x for x in late if isinstance(x, (int, float)) and math.isfinite(x)]
     result["trace_deadline_lateness_p95_ms"] = float(np.percentile(late, 95)) if late else None
     result["trace_step_p95_ms"] = float(np.percentile([t["performance"]["step_ms"] for t in trace], 95)) if trace else None
-    result["trace_deadline_overruns"] = sum(x > 80 for x in late)
+    result["trace_deadline_overruns"] = sum(x > result["wall_tick_ms"] for x in late)
     expected_links = {("persona", "moshi"), ("moshi", "persona")}
     links_present = all(expected_links <= {(x["source"], x["target"]) for x in t["links"]} for t in trace)
     require(links_present, "a peer acoustic path is missing from engine history")
@@ -145,6 +146,7 @@ def check_room(directory, record, errors):
         not result["agents"][k]["worker_final"].get(c, 0)
         for k in AGENTS for c in ("input_overflow_frames", "output_dropped_samples", "decoded_clipped_samples"))
     result["audio_health_pass"] &= not bool(result["performance"].get("overruns", 0))
+    result["audio_health_pass"] &= all(result["agents"][k]["underruns_after_first_second"] == 0 for k in AGENTS)
     result["audio_health_pass"] &= not any(result["performance"].get("adc_clipped_samples", {}).values())
     return result
 

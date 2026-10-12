@@ -104,6 +104,10 @@ def main():
 
     if args.mimi_sdpa_window:
         install_mimi_sdpa_window_bridge()
+        # Raon's Mimi decoder runs in a fresh spawn process. Install the hook
+        # before preload creates that child; parent module patches do not carry.
+        from workers.raon_runtime import install_decoder_spawn_bridge
+        install_decoder_spawn_bridge()
     install_speak_first_bridge(session_module)
     runtime = {"compile_audio_modules": args.compile_audio_modules,
                "disable_cuda_graph": args.disable_cuda_graph,

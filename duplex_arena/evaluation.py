@@ -11,9 +11,12 @@ import numpy as np
 from .server import Session, IDS
 
 
-async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", configuration=None, *, start_barrier=None):
+async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", configuration=None, *, start_barrier=None, playback_rate=1.0):
     if not math.isfinite(seconds) or not 0 < seconds <= 3600:
         raise ValueError("seconds must be in (0, 3600]")
+    if not math.isfinite(playback_rate) or not 0 < playback_rate <= 1:
+        raise ValueError("playback_rate must be in (0, 1]")
+    wall_tick = .08 / playback_rate
     root = Path(output)
     root.mkdir(parents=True, exist_ok=True)
     session = Session(seed=seed, scenario=scenario, models=str(models))
@@ -43,11 +46,11 @@ async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", c
         started = time.perf_counter()
         with (root / "trace.jsonl").open("w") as trace:
             for tick in range(session.engine.horizon):
-                deadline = started + tick * .08
+                deadline = started + tick * wall_tick
                 await asyncio.sleep(max(0, deadline - time.perf_counter()))
                 late = max(0, time.perf_counter() - deadline)
                 lateness.append(late)
-                if late > .08:
+                if late > wall_tick:
                     session.overruns += 1
                 # This is exactly the previous receiver block fed to the adapter.
                 inputs = {k: v.copy() for k, v in session.engine.last_inputs.items()}
@@ -60,7 +63,7 @@ async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", c
                     for key, pcm in blocks.items():
                         writers[key, kind].writeframes((np.clip(pcm, -1, 1) * 32767).astype("<i2").tobytes())
                 frames += 1
-            await asyncio.sleep(max(0, started + frames * .08 - time.perf_counter()))
+            await asyncio.sleep(max(0, started + frames * wall_tick - time.perf_counter()))
     except BaseException as exc:
         failure = f"{type(exc).__name__}: {exc}"
         raise
@@ -71,7 +74,8 @@ async def evaluate_live(models, output, seconds=60, seed=42, scenario="quiet", c
                    "error": failure, "wall_start_utc": wall_start_utc, "wall_end_utc": time.time(),
                    "pre_barrier_worker_stats": pre_barrier_worker_stats,
                    "startup_worker_stats": startup_worker_stats, "frames": frames, "seconds": frames * .08,
-                   "wall_seconds": elapsed, "wall_per_audio_second": elapsed / (frames * .08) if frames else None,
+                   "wall_seconds": elapsed, "playback_rate": playback_rate, "wall_tick_ms": wall_tick * 1000,
+                   "wall_per_audio_second": elapsed / (frames * .08) if frames else None,
                    "deadline_lateness_p95_ms": float(np.percentile(lateness, 95) * 1000) if lateness else None,
                    "seed": seed, "scenario": scenario, "sample_rate": 24000,
                    "transcripts": "model generated text; not receiver ASR",

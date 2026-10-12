@@ -10,7 +10,7 @@ The matrix experiment runs every ordered pair of Moshi, PersonaPlex, and Raon co
 
 There are **nine acoustic engines and eighteen model processes**, with distinct endpoints, adapters, and model state. Every room has two active model slots (`persona` = left, `moshi` = right); `custom` is muted. These slot names do not determine the backend. No room sends audio to another room, and no prerecorded stimulus is inserted.
 
-This document describes the runner and verification procedure. Successful GPU inference, real-time pacing, and usable conversations must be established from an actual completed run; CPU orchestration tests alone do not establish those results.
+This document describes the runner and verification procedure. The example uses **0.5× wall-clock pacing** to give colocated models more compute time. Successful GPU inference and usable conversations must be established from the recorded run; this setting is **not a real-time throughput benchmark**.
 
 ## Prepare and submit
 
@@ -33,7 +33,7 @@ Review the configuration and inspect the plan without launching models:
   --config configs/matrix.example.json --output runs/matrix-run --plan
 ```
 
-The example allocates one worker of each family to each of six job-local GPUs. It uses ports 18000–18017, starts models in batches of two, and defaults to 60 seconds per room. Raon uses a static memory fraction of 0.30, with speak-first conditioning on the left and listen-first conditioning on the right. `raon.mimi_sdpa_window: true` explicitly enables the optional Mimi SDPA window bridge; it is not silently applied to other launchers. Inspect its startup log and validate generated audio when using this compatibility path.
+The example allocates one worker of each family to each of six job-local GPUs. It uses ports 18000–18017, starts models in batches of four, and defaults to 60 simulation seconds per room at `playback_rate: 0.5` (120 wall-clock seconds after readiness). Raon uses a static memory fraction of 0.30, with speak-first conditioning on the left and listen-first conditioning on the right. `raon.mimi_sdpa_window: true` explicitly enables the optional Mimi SDPA window bridge; it is not silently applied to other launchers. Inspect its startup log and validate generated audio when using this compatibility path.
 
 ```bash
 mkdir -p runs
@@ -42,9 +42,17 @@ sbatch workers/matrix.sbatch \
   --config configs/matrix.example.json --output runs/matrix-run
 ```
 
-The batch requests **6 GPUs, 48 CPUs, 512 GiB RAM, and 35 minutes**, using `extra` QOS. On this cluster `extra` is preemptible, including by eligible `own` jobs; a cancelled matrix is an incomplete experiment. Use a fresh output directory to rerun. `--seconds 45` can override the recording duration. GPU assignments are explicit in the configuration; `--gpus` only changes the expected allocation size and does not redistribute workers.
+The batch requests **6 GPUs, 48 CPUs, 512 GiB RAM, and 35 minutes**, using `extra` QOS. On this cluster `extra` is preemptible, including by eligible `own` jobs; a cancelled matrix is an incomplete experiment. Use a fresh output directory to rerun. `--seconds 45` can override the simulation/audio duration (90 wall-clock seconds at 0.5×). `--playback-rate 1` selects real-time input pacing when explicitly testing that setting. GPU assignments are explicit in the configuration; `--gpus` only changes the expected allocation size and does not redistribute workers.
 
 The runner checks ports before launching, waits for all surviving rooms' adapter readiness, then releases an in-process start barrier. Startup conditioning may produce audio before release; evaluation summaries preserve the startup counters. A room that fails readiness does not strand the others. The overall exit status is nonzero unless all nine rooms finish. Startup/cleanup are bounded, and cancellation terminates the runner's own worker process groups. There is no worker attach, external control channel, or NAS-based live coordination.
+
+## Simulation time versus wall-clock pacing
+
+`playback_rate` is simulation seconds per wall-clock second and must be in `(0, 1]`. With the example's rate of 0.5, a 60-second, 750-frame conversation runs for about 120 wall-clock seconds, excluding startup and cleanup. All nine rooms still run concurrently behind the same readiness barrier. Model instances, room separation, and the three-models-per-GPU placement remain unchanged.
+
+The audio format stays **24 kHz mono**, with **1,920 samples per 80 ms simulation tick**. Slower input pacing does not resample audio, stretch voices, or add a silence block between recorded frames. Replay and exported videos use the normal audio/simulation timeline. A 60-second video therefore presents 60 seconds of generated audio, while the inference job took about 120 seconds to collect it. Keep that distinction visible in published timing claims.
+
+The manifest and `matrix.json` record `playback_rate`, `simulation_seconds`/`seconds`, and `target_wall_seconds`; room summaries record actual wall time. At 0.5×, a wall/audio ratio near 2 is intentional. Compare startup and sustained buffer counters separately and review the resulting audio: relaxed pacing alone does not establish good dialogue or remove every underrun.
 
 ## Verify the experiment
 
@@ -98,7 +106,7 @@ Open `http://127.0.0.1:18766/?matrix`. From a workstation:
 ssh -N -L 18766:127.0.0.1:18766 YOUR_SSH_LOGIN_ALIAS
 ```
 
-The grid presents nine rooms on a common recorded timeline. Select a room to hear its audio. Presentation audio mixes the two emissions within the selected room; independent rooms are never mixed together or fed back into one another. Per-agent receiver WAVs remain the evidence of what each model heard.
+The grid presents nine rooms on a common recorded simulation/audio timeline; its clock is not the elapsed GPU-job wall time. Select a room to hear its audio. Presentation audio mixes the two emissions within the selected room; independent rooms are never mixed together or fed back into one another. Per-agent receiver WAVs remain the evidence of what each model heard.
 
 Install the Chromium/Playwright/FFmpeg dependencies described in [Showcase](SHOWCASE.md), then render a bounded CPU batch:
 

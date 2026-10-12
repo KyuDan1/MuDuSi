@@ -8,7 +8,7 @@
   "seed": 42,
   "scenario": "quiet",
   "port_start": 18000,
-  "startup_batch_size": 2,
+  "startup_batch_size": 4,
   "startup_timeout_seconds": 1200,
   "session_startup_timeout_seconds": 600,
   "monitor_interval_seconds": 5,
@@ -84,5 +84,6 @@
   "gpu_count": 6,
   "raon": {
     "mimi_sdpa_window": true
-  }
+  },
+  "playback_rate": 0.5
 }

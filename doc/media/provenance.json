@@ -1,0 +1,38 @@
+[
+  {
+    "file": "two-friends.mp4",
+    "recording": "runs/showcase-2",
+    "start_seconds": 0,
+    "selected_seconds": 26.92,
+    "decoded_frames": 646,
+    "fps": 24,
+    "bytes": 1504317,
+    "sha256": "661d3e9ceb7503164b6a8238f1e40798257bf9449b395e342cad26a901330218",
+    "audio": "Actual model emissions; loudness mastered, AAC encoded",
+    "captions": "Offline Whisper-small ASR with word-timed display"
+  },
+  {
+    "file": "clerk-customer.mp4",
+    "recording": "runs/cafe-customer",
+    "start_seconds": 9.5,
+    "selected_seconds": 20.75,
+    "decoded_frames": 498,
+    "fps": 24,
+    "bytes": 1168664,
+    "sha256": "0e52c7ea9722db88de69ff59f7f5be434309707bc07d46f826bae13ddf1ebad2",
+    "audio": "Actual model emissions; loudness mastered, AAC encoded",
+    "captions": "Offline Whisper-small ASR with word-timed display"
+  },
+  {
+    "file": "three-agents.mp4",
+    "recording": "runs/showcase-3",
+    "start_seconds": 0,
+    "selected_seconds": 14.92,
+    "decoded_frames": 358,
+    "fps": 24,
+    "bytes": 1075921,
+    "sha256": "beb48b3f1f982a98b6c222af8a0c2fb4b93290156b51e3fcf48a233adcb6f95a",
+    "audio": "Actual model emissions; loudness mastered, AAC encoded",
+    "captions": "Offline Whisper-small ASR with word-timed display"
+  }
+]

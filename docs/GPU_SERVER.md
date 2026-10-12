@@ -12,7 +12,10 @@ worker is an integration point; this repository does not bundle a third model.
 
 GPU count alone is not enough: checkpoint size, precision, context length,
 concurrent sessions and inference implementation determine memory/throughput.
-No GPU inference benchmark was run while building this project.
+Bounded PersonaPlex–Moshi inference runs have been verified on B200 GPUs;
+[recorded measurements](B200_VERIFICATION.md) cover memory use, frame timing,
+audio routing, and buffer diagnostics. These measurements validate that setup,
+not a cross-hardware or conversation-quality benchmark.
 
 ## 1. Install the arena
 

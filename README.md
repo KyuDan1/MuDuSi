@@ -203,7 +203,7 @@ mudusi serve --models configs/echo.example.json
 
 If you use MuDuSi in your research, please cite the [technical report](https://kyudan1.github.io/MuDuSi/paper/):
 
-> Kyudan Jung and Jaegul Choo. **MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models.** MuDuSi Project, Technical Report MUDUSI-TR-2026-01, version 1.0, October 12, 2026. Both authors: KAIST AI.
+> Kyudan Jung and Jaegul Choo. **MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models.** MuDuSi Project, Technical Report MUDUSI-TR-2026-01, version 1.1, October 13, 2026. Both authors: KAIST AI.
 
 ```bibtex
 @techreport{jung2026mudusi,
@@ -214,7 +214,7 @@ If you use MuDuSi in your research, please cite the [technical report](https://k
   number      = {MUDUSI-TR-2026-01},
   year        = {2026},
   month       = oct,
-  note        = {Version 1.0, October 12, 2026},
+  note        = {Version 1.1, October 13, 2026},
   url         = {https://kyudan1.github.io/MuDuSi/paper/}
 }
 ```

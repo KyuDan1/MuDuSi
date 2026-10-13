@@ -2,9 +2,10 @@
 
 [Read the PDF](mudusi-technical-report.pdf) · [LaTeX source](mudusi-technical-report.tex) · [References](mudusi-technical-report.bib)
 
-**Kyudan Jung and Jaegul Choo · KAIST AI · October 12, 2026 · Version 1.0**
+**Kyudan Jung and Jaegul Choo · KAIST AI · October 13, 2026 · Version 1.1**
 
 Technical Report **MUDUSI-TR-2026-01**, self-published by the MuDuSi Project.
+First published October 12, 2026; revised October 13, 2026.
 [Canonical paper page](https://kyudan1.github.io/MuDuSi/paper/)
 
 The English report describes MuDuSi (Multi-agent Duplex Simulator) and documents the implemented simulator, inference/evaluation,

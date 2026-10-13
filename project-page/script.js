@@ -20,11 +20,11 @@ if ('IntersectionObserver' in window) {
   document.querySelectorAll('main section[id]').forEach(section => observer.observe(section));
 }
 
-// Keep native controls as the fallback; the prominent play button opts into audio.
+// Start silently; native controls enable sound and the button handles blocked autoplay.
 const introVideo = document.querySelector('#introduction-video');
 const introPlay = document.querySelector('.hero-film-play');
 if (introVideo && introPlay) {
-  introPlay.hidden = false;
+  introPlay.hidden = !introVideo.paused;
   introPlay.addEventListener('click', async () => {
     if (introVideo.ended) introVideo.currentTime = 0;
     introVideo.muted = false;
@@ -32,4 +32,6 @@ if (introVideo && introPlay) {
   });
   introVideo.addEventListener('play', () => { introPlay.hidden = true; });
   introVideo.addEventListener('ended', () => { introPlay.hidden = false; });
+  introVideo.muted = true;
+  introVideo.play().catch(() => { introPlay.hidden = false; });
 }

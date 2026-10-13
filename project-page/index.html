@@ -7,8 +7,8 @@
     <meta name="description" content="MuDuSi is a virtual testbed for speech agents: visualize multi-agent conversations, vary acoustic scenes, and collect interaction trajectories before setting up physical hardware.">
     <title>MuDuSi · Multi-agent Duplex Simulator</title>
     <link rel="canonical" href="https://kyudan1.github.io/MuDuSi/">
-    <link rel="stylesheet" href="styles.css?v=pastel-20261012">
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="styles.css?v=hero-film-20261013">
+    <script src="script.js?v=hero-film-20261013" defer></script>
   </head>
   <body id="top">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -18,11 +18,23 @@
           <a class="home-link" href="https://kyudan1.github.io/">Kyudan Jung <span aria-hidden="true">↗</span></a>
           <div><a href="#purpose">Overview</a><a href="#conversations">Conversations</a><a href="#start">Get started</a></div>
         </nav>
+        <div class="hero-feature">
         <div class="hero-copy">
           <h1>MuDuSi<span class="pronunciation">/ moo · doo · see /</span></h1>
           <p class="expansion">Multi-agent Duplex Simulator</p>
           <p class="hero-description">A virtual testbed for speech agents.<br class="desktop-break"> Test listening and speaking before setting up the hardware.</p>
           <div class="hero-links"><a href="paper/">Technical report <span aria-hidden="true">↗</span></a><a href="https://github.com/KyuDan1/MuDuSi">Code &amp; documentation <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <figure class="hero-film" id="introduction">
+          <div class="hero-film-player">
+            <video id="introduction-video" controls playsinline preload="none" poster="assets/three-agents.jpg?v=pastel-20261012" aria-label="MuDuSi introduction: friends, clerk and customer, three agents, and nine simultaneous rooms">
+              <source src="assets/introduction.mp4" type="video/mp4">
+              <a href="assets/introduction.mp4">Watch the introduction.</a>
+            </video>
+            <button class="hero-film-play" type="button" hidden aria-controls="introduction-video"><span aria-hidden="true">▶</span> Watch the introduction <span class="film-duration">2:13 · Sound on</span></button>
+          </div>
+          <figcaption>Friends. A coffee shop. Three voices. Nine rooms.<a href="assets/introduction.mp4">Download film ↗</a></figcaption>
+        </figure>
         </div>
         <div class="hero-bottom"><span>Full-duplex speech · Spatial acoustics · Multi-agent interaction</span><a href="#conversations">Listen to the conversations <span aria-hidden="true">↓</span></a></div>
       </div>
@@ -47,7 +59,7 @@
           <p class="section-index">02 / Conversations</p>
           <h2 id="conversations-heading">Listen to a shared world.</h2>
           <p class="section-intro">Each agent generates its own speech. The simulator carries that sound through the room into the other agents’ microphones, letting conversations unfold without assigned speaking turns.</p>
-          <p><a href="assets/introduction.mp4">Watch the full introduction</a> — friends, clerk and customer, three agents, and nine simultaneous rooms. <a href="assets/introduction.json">Video provenance</a>.</p>
+          <p><a href="#introduction">Watch the full introduction</a> — friends, clerk and customer, three agents, and nine simultaneous rooms. <a href="assets/introduction.json">Video provenance</a>.</p>
           <figure class="conversation">
             <div class="figure-heading"><h3>Two friends</h3><span>PersonaPlex + Moshi</span></div>
             <video controls playsinline preload="none" poster="assets/two-friends.jpg?v=pastel-20261012" aria-label="Two friends: a conversation between PersonaPlex and Moshi"><source src="assets/two-friends.mp4?v=pastel-20261012" type="video/mp4">Your browser does not support embedded video. <a href="assets/two-friends.mp4?v=pastel-20261012">Download the conversation.</a></video>

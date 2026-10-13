@@ -19,3 +19,17 @@ if ('IntersectionObserver' in window) {
   }, { rootMargin: '-5% 0px -65% 0px', threshold: 0 });
   document.querySelectorAll('main section[id]').forEach(section => observer.observe(section));
 }
+
+// Keep native controls as the fallback; the prominent play button opts into audio.
+const introVideo = document.querySelector('#introduction-video');
+const introPlay = document.querySelector('.hero-film-play');
+if (introVideo && introPlay) {
+  introPlay.hidden = false;
+  introPlay.addEventListener('click', async () => {
+    if (introVideo.ended) introVideo.currentTime = 0;
+    introVideo.muted = false;
+    try { await introVideo.play(); } catch { introPlay.hidden = false; }
+  });
+  introVideo.addEventListener('play', () => { introPlay.hidden = true; });
+  introVideo.addEventListener('ended', () => { introPlay.hidden = false; });
+}

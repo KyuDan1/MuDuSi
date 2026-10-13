@@ -1,0 +1,42 @@
+[
+  {
+    "file": "two-friends.jpg",
+    "recording": "runs/showcase-2",
+    "simulation_time_seconds": 3,
+    "width": 1920,
+    "height": 1080,
+    "caption_source": "Offline emitted-audio ASR",
+    "source": "Actual recorded experiment replay",
+    "browser_errors": []
+  },
+  {
+    "file": "clerk-customer.jpg",
+    "recording": "runs/cafe-customer",
+    "simulation_time_seconds": 16.42,
+    "width": 1920,
+    "height": 1080,
+    "caption_source": "Offline emitted-audio ASR",
+    "source": "Actual recorded experiment replay",
+    "browser_errors": []
+  },
+  {
+    "file": "three-agents.jpg",
+    "recording": "runs/showcase-3",
+    "simulation_time_seconds": 4.96,
+    "width": 1920,
+    "height": 1080,
+    "caption_source": "Offline emitted-audio ASR",
+    "source": "Actual recorded experiment replay",
+    "browser_errors": []
+  },
+  {
+    "file": "nine-rooms.jpg",
+    "recording": "runs/matrix-nine-four-gpu-20261012",
+    "simulation_time_seconds": 18,
+    "width": 1920,
+    "height": 1080,
+    "caption_source": "Offline emitted-audio ASR",
+    "source": "Existing actual matrix video poster",
+    "collection_playback_rate": 0.25
+  }
+]

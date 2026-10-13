@@ -25,10 +25,10 @@
     <h1>MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models</h1>
     <p class="paper-authors">Kyudan Jung · Jaegul Choo</p>
     <p class="paper-affiliation">KAIST AI</p>
-    <p class="paper-meta">Published October 12, 2026 · Revised October 13, 2026 · Version 1.1 · MUDUSI-TR-2026-01</p>
+    <p class="paper-meta">Published October 12, 2026 · Revised October 13, 2026 · Version 1.2 · MUDUSI-TR-2026-01</p>
     <h2>Abstract</h2>
     <p class="paper-abstract">MuDuSi (Multi-agent Duplex Simulator) is a virtual acoustic testbed for independently running full-duplex speech models. It couples simultaneous listening and speaking through a 24 kHz PCM engine with spatial attenuation, propagation delay, occlusion, reflection, and microphone noise. Aligned source, receiver, and model-input recordings support frozen-model evaluation and acoustic trajectory collection. We describe the interaction and timing contracts and report NVIDIA B200 experiments with PersonaPlex, Moshi, and Raon. Paired conversations completed at real-time input pacing. A larger experiment ran all nine ordered model pairs concurrently as eighteen isolated workers on four GPUs, recording 60 audio seconds per room over approximately 240 wall-clock seconds. All eighteen agents generated audio; routing checks passed, with no sustained underruns, input overflows, output drops, or clipping. This is a reduced-pacing collection result, not a real-time throughput claim. Offline ASR review nevertheless exposed substantial speech-quality problems in both Moshi–Raon pairings. We distinguish operational validity from conversational competence and acoustic recordings from token-policy rollouts. Prospective applications include HiPLEX-style hierarchical policy evaluation, overlap-aware benchmarks, and reinforcement learning; full speech-model policy training is not implemented.</p>
-    <div class="paper-downloads"><a href="mudusi-technical-report.pdf">Full paper (PDF)</a><a href="citation.bib">BibTeX</a><a href="../">Project &amp; demonstrations</a><a href="https://github.com/KyuDan1/MuDuSi">Source code</a></div>
+    <div class="paper-downloads"><a href="mudusi-technical-report.pdf?v=1.2">Full paper (PDF)</a><a href="mudusi-technical-report.pdf?v=1.2#page=12">Demo screenshots</a><a href="citation.bib">BibTeX</a><a href="../">Project &amp; demonstrations</a><a href="https://github.com/KyuDan1/MuDuSi">Source code</a></div>
     <section class="paper-citation" aria-labelledby="citation-heading">
       <h2 id="citation-heading">Citation</h2>
       <pre><code>@techreport{jung2026mudusi,
@@ -39,7 +39,7 @@
   number      = {MUDUSI-TR-2026-01},
   year        = {2026},
   month       = oct,
-  note        = {Version 1.1, October 13, 2026},
+  note        = {Version 1.2, October 13, 2026},
   url         = {https://kyudan1.github.io/MuDuSi/paper/}
 }</code></pre>
       <p class="paper-note">Technical report published by the MuDuSi Project. The report uses the NeurIPS 2026 preprint format; it is not a statement of conference acceptance or institutional endorsement.</p>

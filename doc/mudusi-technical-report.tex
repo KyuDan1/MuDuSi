@@ -2,7 +2,7 @@
 \usepackage[preprint]{neurips_2026}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{microtype,booktabs,amsmath,amssymb}
+\usepackage{microtype,booktabs,amsmath,amssymb,graphicx}
 \usepackage[table]{xcolor}
 \definecolor{MuSage}{HTML}{B7D7C0}
 \definecolor{MuLavender}{HTML}{C9C0E8}
@@ -12,10 +12,10 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 \usepackage[colorlinks=true,linkcolor=MuForest,citecolor=MuForest,urlcolor=MuForest]{hyperref}
-\hypersetup{pdftitle={MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models},pdfauthor={Kyudan Jung; Jaegul Choo},pdfsubject={Technical Report MUDUSI-TR-2026-01, Version 1.1, October 13, 2026},pdfkeywords={full-duplex speech, multi-agent simulation, acoustic trajectories, reinforcement learning}}
+\hypersetup{pdftitle={MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models},pdfauthor={Kyudan Jung; Jaegul Choo},pdfsubject={Technical Report MUDUSI-TR-2026-01, Version 1.2, October 13, 2026},pdfkeywords={full-duplex speech, multi-agent simulation, acoustic trajectories, reinforcement learning}}
 \title{MuDuSi: A Multi-Agent Acoustic Simulator\\ for Full-Duplex Speech Language Models}
 \author{Kyudan Jung \qquad Jaegul Choo\\KAIST AI\\[3pt]
-Technical Report MUDUSI-TR-2026-01\\October 13, 2026\quad$\cdot$\quad Version 1.1\\
+Technical Report MUDUSI-TR-2026-01\\October 13, 2026\quad$\cdot$\quad Version 1.2\\
 \url{https://kyudan1.github.io/MuDuSi/paper/}}
 \newcommand{\code}[1]{\texttt{#1}}
 \begin{document}
@@ -31,7 +31,7 @@ MuDuSi provides a software testbed before such deployment. Independent model ses
 
 The contribution is an executable interaction substrate: simultaneous PCM actions, explicit receiver-to-input alignment, bounded asynchronous transport, and inspectable audiovisual records. We report engineering measurements from real model runs rather than a semantic benchmark. Full-weight speech-language model (SLM) RL is not implemented; the included trainable example is a small stochastic gate. The reference implementation and operational instructions are maintained at \url{https://github.com/KyuDan1/MuDuSi}.
 
-Our design separates three questions often conflated in a demonstration: whether a model emitted samples, whether those samples reached another model through the intended acoustic path, and whether the resulting interaction was useful. Each question requires different evidence. A visually active scene cannot answer the second without aligned recordings, and zero buffer errors cannot answer the third without perceptual and task evaluation. The experiments deliberately retain unsuccessful cases alongside selected presentation clips.
+Our design separates three questions often conflated in a demonstration: whether a model emitted samples, whether those samples reached another model through the intended acoustic path, and whether the resulting interaction was useful. Each question requires different evidence. A visually active scene cannot answer the second without aligned recordings, and zero buffer errors cannot answer the third without perceptual and task evaluation. The experiments deliberately retain unsuccessful cases alongside selected presentation clips. Appendix~\ref{sec:gallery} shows four recorded demonstration views, complementing the quantitative results.
 
 \section{Related work}
 \paragraph{Speech models.} Moshi jointly models incoming and outgoing speech streams, with time-aligned text generation \citep{defossez2024moshi}. PersonaPlex adds role and voice conditioning to a Moshi-derived full-duplex model \citep{roy2026personaplex}. MuDuSi connects independent instances of such models through spatial microphone mixtures; it does not propose a new speech architecture. Whisper \citep{radford2023whisper} is used as an external recognizer, with its output kept separate from native model text.
@@ -275,6 +275,39 @@ The project packages generic configurations, tests, report sources, and curated 
 
 \section{Conclusion}
 MuDuSi supplies a shared virtual acoustic loop for independent full-duplex speech sessions, with explicit timing and aligned recordings. Real-time paired experiments verify emission-to-peer routing; a four-GPU, eighteen-worker collection extends this to nine concurrently recorded rooms at quarter-speed input pacing. The larger experiment has healthy sustained buffers but retains substantial speech-quality failures, demonstrating why operational and semantic evidence must be assessed separately. Its acoustic trajectories and replay tools support controlled model evaluation today. Hierarchical policy experiments, semantic credit assignment, and full SLM reinforcement learning require additional event, probability, and synchronization interfaces before they can be claimed as implemented capabilities.
+
+
+\clearpage
+\appendix
+\section{Recorded demonstration views}
+\label{sec:gallery}
+These captures show actual recorded experiments, not synthetic dialogue mockups.
+Speech bubbles replay offline ASR of emitted audio; the displayed clock is simulation time.
+The images illustrate observability rather than establish conversation quality.
+Full videos are available on the \href{https://kyudan1.github.io/MuDuSi/}{project page}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.93\linewidth]{figures/two-friends.jpg}
+\caption{\textbf{Two friends.} PersonaPlex and Moshi in the recorded two-agent scene at 3.00 s. The view combines spatial positions, recognized speech, per-agent activity, and receiver levels.}
+\label{fig:friends}
+\vspace{1em}
+\includegraphics[width=.93\linewidth]{figures/clerk-customer.jpg}
+\caption{\textbf{Clerk and customer.} Two independently stateful PersonaPlex instances with role and voice conditioning, at 16.42 s. The voices and utterances are model-generated; role prompts do not prescribe the transcript.}
+\label{fig:cafe}
+\end{figure}
+
+\clearpage
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.93\linewidth]{figures/three-agents.jpg}
+\caption{\textbf{Three-way conversation.} Two PersonaPlex instances and one Moshi instance share a single acoustic scene, at 4.96 s. Each hears its own mixture of the other sources. Activity indicators are not inferred diarization labels.}
+\label{fig:three}
+\vspace{1em}
+\includegraphics[width=.93\linewidth]{figures/nine-rooms.jpg}
+\caption{\textbf{Nine independent rooms.} All ordered pairs of Moshi, PersonaPlex, and Raon, at 18.00 s. Eighteen workers share four GPUs while each pair remains acoustically isolated. Highlighting selects playback audio only. The 0.25$\times$ collection label distinguishes paced collection from normal-speed replay; unresolved Raon speech-quality issues remain visible in ASR.}
+\label{fig:nine}
+\end{figure}
 
 \clearpage
 \bibliographystyle{plainnat}

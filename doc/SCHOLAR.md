@@ -4,7 +4,7 @@ MuDuSi's technical report has a stable citation independent of search-engine ind
 
 - **Title:** MuDuSi: A Multi-Agent Acoustic Simulator for Full-Duplex Speech Language Models
 - **Authors:** Kyudan Jung; Jaegul Choo, in that order. Both affiliations: **KAIST AI**.
-- **Publication:** MuDuSi Project, Technical Report **MUDUSI-TR-2026-01**, version **1.1**, revised **October 13, 2026**; first published **October 12, 2026**.
+- **Publication:** MuDuSi Project, Technical Report **MUDUSI-TR-2026-01**, version **1.2**, revised **October 13, 2026**; first published **October 12, 2026**.
 - **Canonical report page:** <https://kyudan1.github.io/MuDuSi/paper/>
 - **Full-text PDF:** <https://kyudan1.github.io/MuDuSi/paper/mudusi-technical-report.pdf>
 - **Citation files:** [BibTeX](../CITATION.bib) and [CFF](../CITATION.cff).
@@ -13,7 +13,7 @@ MuDuSi Project identifies the self-publishing project, not the authors' institut
 
 ## GitHub citation behavior
 
-The root CFF file describes the software and points `preferred-citation` to the report. GitHub supports CFF `report` as a preferred citation and maps it to BibTeX `@techreport`; its repository citation feature reads a root `CITATION.cff` on the default branch. The software version is 0.1.0, while the separately versioned report is 1.1. [GitHub citation documentation](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files)
+The root CFF file describes the software and points `preferred-citation` to the report. GitHub supports CFF `report` as a preferred citation and maps it to BibTeX `@techreport`; its repository citation feature reads a root `CITATION.cff` on the default branch. The software version is 0.1.0, while the separately versioned report is 1.2. [GitHub citation documentation](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files)
 
 ## Google Scholar preparation
 
@@ -32,7 +32,7 @@ For this report, the intended HTML values are:
 <meta name="citation_pdf_url" content="https://kyudan1.github.io/MuDuSi/paper/mudusi-technical-report.pdf">
 ```
 
-The original `citation_publication_date` remains October 12. The visible revision date, current BibTeX/CFF citation, and `citation_online_date` identify the October 13 version 1.1 update at the same canonical URL.
+The original `citation_publication_date` remains October 12. The visible revision date, current BibTeX/CFF citation, and `citation_online_date` identify the October 13 version 1.2 update at the same canonical URL.
 
 The public deployment should be checked without authentication: the page and PDF must load, the abstract must be readable, and title/author metadata must match the PDF. A valid CFF file, an accessible PDF, or successful deployment does **not** prove Scholar inclusion. Its crawler and parser make that decision. Check later by searching Scholar for the exact report title, rather than inferring inclusion from a `site:` result count. [Google Scholar troubleshooting](https://scholar.google.com/intl/en/scholar/inclusion.html#troubleshooting)
 

@@ -2,7 +2,7 @@
 
 [Read the PDF](mudusi-technical-report.pdf) · [LaTeX source](mudusi-technical-report.tex) · [References](mudusi-technical-report.bib)
 
-**Kyudan Jung and Jaegul Choo · KAIST AI · October 13, 2026 · Version 1.1**
+**Kyudan Jung and Jaegul Choo · KAIST AI · October 13, 2026 · Version 1.2**
 
 Technical Report **MUDUSI-TR-2026-01**, self-published by the MuDuSi Project.
 First published October 12, 2026; revised October 13, 2026.
@@ -12,6 +12,10 @@ The English report describes MuDuSi (Multi-agent Duplex Simulator) and documents
 acoustic trajectories, B200 execution evidence, limitations, and the interfaces
 still required for full-weight SLM reinforcement learning. It is a project
 technical report, not a claim of conference submission or acceptance.
+
+The demonstration appendix includes four actual replay captures: two friends,
+clerk/customer, three agents, and nine concurrent rooms. Image provenance and
+simulation timestamps are retained in [figures/provenance.json](figures/provenance.json).
 
 ## Build
 

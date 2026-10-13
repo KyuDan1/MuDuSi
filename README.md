@@ -9,7 +9,9 @@ Full-duplex speech agents, sharing one acoustic world.
 
 Test speech agents in a virtual acoustic world before arranging microphones, speakers, and physical devices.
 
-[Project page](https://kyudan1.github.io/MuDuSi/) · [Technical report](https://kyudan1.github.io/MuDuSi/paper/) · [Quick start](#quick-start) · [Simulation modes](#simulation-modes) · [GPU setup](docs/GPU_SERVER.md) · [Contribute](CONTRIBUTING.md)
+**[Project page](https://kyudan1.github.io/MuDuSi/) · [Technical report](https://kyudan1.github.io/MuDuSi/paper/)**
+
+[Quick start](#quick-start) · [Simulation modes](#simulation-modes) · [GPU setup](docs/GPU_SERVER.md) · [Contribute](CONTRIBUTING.md)
 
 **24 kHz audio · simultaneous listening and speaking · per-agent microphone recordings**
 

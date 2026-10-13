@@ -33,6 +33,18 @@
     {
       "kind": "video",
       "path": "output/mudusi-three-agents-pastel.mp4"
+    },
+    {
+      "kind": "card",
+      "path": "output/film-cards-mudusi-pastel/nine.png",
+      "seconds": 3
+    },
+    {
+      "kind": "video",
+      "path": "output/mudusi-nine-rooms.mp4"
     }
-  ]
+  ],
+  "width": 1920,
+  "height": 1080,
+  "title": "MuDuSi \u2014 Friends, Cafe, Three Agents, Nine Rooms"
 }

@@ -44,6 +44,9 @@ def main():
     args = parser.parse_args()
     spec = json.loads(Path(args.manifest).read_text())
     fps, fade = int(spec.get('fps', 24)), float(spec.get('transition', .5))
+    width, height = int(spec.get('width', 1280)), int(spec.get('height', 720))
+    if min(width, height) <= 0 or width % 2 or height % 2:
+        raise ValueError('Video dimensions must be positive even integers')
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
     segments = spec['segments']
     for segment in segments:
@@ -58,7 +61,7 @@ def main():
             command += ['-loop', '1', '-framerate', str(fps), '-t', str(duration)]
         command += ['-i', segment['path']]
         # setpts clears frame-rate metadata; restore fps before tpad/xfade.
-        vf = f'[{i}:v]fps={fps},scale=1280:720,setsar=1,format=yuv420p,trim=duration={duration},settb=1/{fps},setpts=N,fps={fps}'
+        vf = f'[{i}:v]fps={fps},scale={width}:{height},setsar=1,format=yuv420p,trim=duration={duration},settb=1/{fps},setpts=N,fps={fps}'
         if kind == 'video':
             vf += f',tpad=start_mode=clone:stop_mode=clone:start_duration={fade}:stop_duration={fade}'
             filters.append(f'[{i}:a]atrim=duration={duration},asetpts=PTS-STARTPTS,aresample=48000,'
@@ -79,7 +82,7 @@ def main():
     command += ['-filter_complex', ';'.join(filters), '-map', '[video]', '-map', f'[{previous_a}]',
                 '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-threads', '4', '-pix_fmt', 'yuv420p',
                 '-r', str(fps), '-c:a', 'aac', '-ar', '48000', '-b:a', '192k', '-t', str(duration),
-                '-movflags', '+faststart', '-metadata', 'title=MuDuSi — Friends, Cafe, Three Agents', str(output)]
+                '-movflags', '+faststart', '-metadata', 'title=' + spec.get('title', 'MuDuSi — Introduction'), str(output)]
     subprocess.run(command, check=True)
     decoded = subprocess.run([ffmpeg, '-v', 'error', '-i', str(output), '-map', '0:v:0', '-map', '0:a:0',
                               '-threads', '4', '-progress', 'pipe:1', '-f', 'null', '-'], capture_output=True, text=True, check=True)
@@ -88,7 +91,7 @@ def main():
     progress = dict(line.split('=', 1) for line in decoded.stdout.splitlines() if '=' in line)
     if abs(int(progress['frame']) - round(duration * fps)) > 1:
         raise RuntimeError(f'Incomplete video: {progress["frame"]} frames, expected {round(duration * fps)}')
-    result = {'fps': fps, 'transition': fade, 'planned_duration': duration, 'segments': plan,
+    result = {'width': width, 'height': height, 'fps': fps, 'transition': fade, 'planned_duration': duration, 'segments': plan,
               'decode_ok': True, 'decoded_frames': int(progress['frame']),
               'decoded_seconds': int(progress['out_time_us']) / 1e6,
               'audio': 'Original model audio; silent cards and padding protect speech during crossfades.'}

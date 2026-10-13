@@ -40,7 +40,9 @@ const escape = (s) =>
     for (const card of cards) {
       const colors = [theme.sage, theme.lavender, theme.apricot];
       const points =
-        card.count === 2
+        card.count === 9
+          ? Array.from({length:9}, (_, i) => [905 + (i % 3) * 80, 255 + Math.floor(i / 3) * 80])
+          : card.count === 2
           ? [
               [955, 275],
               [1055, 425],
@@ -53,10 +55,10 @@ const escape = (s) =>
       const graphic = points
         .map(
           ([x, y], i) =>
-            `<circle cx="${x}" cy="${y}" r="${90 + i * 8}" fill="none" stroke="${colors[i]}" stroke-opacity=".12"/><circle cx="${x}" cy="${y}" r="42" fill="${colors[i]}" fill-opacity=".07" stroke="${colors[i]}" stroke-opacity=".7"/><circle cx="${x}" cy="${y}" r="7" fill="${colors[i]}"/>`,
+            `<circle cx="${x}" cy="${y}" r="${card.count === 9 ? 31 : 90 + i * 8}" fill="none" stroke="${colors[i % colors.length]}" stroke-opacity=".12"/><circle cx="${x}" cy="${y}" r="${card.count === 9 ? 20 : 42}" fill="${colors[i % colors.length]}" fill-opacity=".07" stroke="${colors[i % colors.length]}" stroke-opacity=".7"/><circle cx="${x}" cy="${y}" r="7" fill="${colors[i % colors.length]}"/>`,
         )
         .join("");
-      const lines = points
+      const lines = (card.count === 9 ? [] : points)
         .slice(1)
         .map(
           ([x, y]) =>
@@ -69,6 +71,7 @@ const escape = (s) =>
         ["01", "FRIENDS"],
         ["02", "CLERK + CUSTOMER"],
         ["03", "THREE AGENTS"],
+        ["04", "NINE ROOMS"],
       ]
         .map(
           ([n, label]) =>

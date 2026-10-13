@@ -1,0 +1,133 @@
+{
+  "width": 1920,
+  "height": 1080,
+  "fps": 24,
+  "transition": 0.5,
+  "planned_duration": 132.58333333333334,
+  "segments": [
+    {
+      "kind": "card",
+      "path": "output/film-cards-mudusi-pastel/intro.png",
+      "seconds": 4,
+      "start": 0,
+      "end": 4.0,
+      "padded_seconds": 4.0,
+      "speech_start": null,
+      "speech_end": null
+    },
+    {
+      "kind": "card",
+      "path": "output/film-cards-mudusi-pastel/friends.png",
+      "seconds": 3,
+      "start": 3.5,
+      "end": 6.5,
+      "padded_seconds": 3.0,
+      "speech_start": null,
+      "speech_end": null
+    },
+    {
+      "kind": "video",
+      "path": "output/mudusi-two-agents-pastel.mp4",
+      "seconds": 26.916666666666668,
+      "start": 6.0,
+      "end": 33.91666666666667,
+      "padded_seconds": 27.916666666666668,
+      "speech_start": 6.5,
+      "speech_end": 33.41666666666667
+    },
+    {
+      "kind": "card",
+      "path": "output/film-cards-mudusi-pastel/cafe.png",
+      "seconds": 3,
+      "start": 33.41666666666667,
+      "end": 36.41666666666667,
+      "padded_seconds": 3.0,
+      "speech_start": null,
+      "speech_end": null
+    },
+    {
+      "kind": "video",
+      "path": "output/mudusi-cafe-pastel.mp4",
+      "seconds": 20.75,
+      "start": 35.91666666666667,
+      "end": 57.66666666666667,
+      "padded_seconds": 21.75,
+      "speech_start": 36.41666666666667,
+      "speech_end": 57.16666666666667
+    },
+    {
+      "kind": "card",
+      "path": "output/film-cards-mudusi-pastel/three.png",
+      "seconds": 3,
+      "start": 57.16666666666667,
+      "end": 60.16666666666667,
+      "padded_seconds": 3.0,
+      "speech_start": null,
+      "speech_end": null
+    },
+    {
+      "kind": "video",
+      "path": "output/mudusi-three-agents-pastel.mp4",
+      "seconds": 14.916666666666666,
+      "start": 59.66666666666667,
+      "end": 75.58333333333334,
+      "padded_seconds": 15.916666666666666,
+      "speech_start": 60.16666666666667,
+      "speech_end": 75.08333333333334
+    },
+    {
+      "kind": "card",
+      "path": "output/film-cards-mudusi-pastel/nine.png",
+      "seconds": 3,
+      "start": 75.08333333333334,
+      "end": 78.08333333333334,
+      "padded_seconds": 3.0,
+      "speech_start": null,
+      "speech_end": null
+    },
+    {
+      "kind": "video",
+      "path": "output/mudusi-nine-rooms.mp4",
+      "seconds": 54.0,
+      "start": 77.58333333333334,
+      "end": 132.58333333333334,
+      "padded_seconds": 55.0,
+      "speech_start": 78.08333333333334,
+      "speech_end": 132.08333333333334
+    }
+  ],
+  "decode_ok": true,
+  "decoded_frames": 3182,
+  "decoded_seconds": 132.583333,
+  "audio": "Original model audio; silent cards and padding protect speech during crossfades.",
+  "file": "introduction.mp4",
+  "sha256": "8abf1f6073fdff70e1ce0202896d94869692c3544b163a0cb750cbdbc3984428",
+  "bytes": 14228476,
+  "audio_alignment": [
+    {
+      "source": "output/mudusi-two-agents-pastel.mp4",
+      "speech_start": 6.5,
+      "seconds": 26.916666666666668,
+      "audio_correlation": 0.9998266787406626
+    },
+    {
+      "source": "output/mudusi-cafe-pastel.mp4",
+      "speech_start": 36.41666666666667,
+      "seconds": 20.75,
+      "audio_correlation": 0.9994372093380416
+    },
+    {
+      "source": "output/mudusi-three-agents-pastel.mp4",
+      "speech_start": 60.16666666666667,
+      "seconds": 14.916666666666666,
+      "audio_correlation": 0.9996531474828931
+    },
+    {
+      "source": "output/mudusi-nine-rooms.mp4",
+      "speech_start": 78.08333333333334,
+      "seconds": 54.0,
+      "audio_correlation": 0.9993498096376305
+    }
+  ],
+  "matrix_note": "Nine-room segment collected at 0.25x and replayed at normal speed; offline ASR; unresolved Raon speech quality in Moshi pairings."
+}

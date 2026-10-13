@@ -150,7 +150,7 @@ matching URL query parameters. Captions remain emitted-audio ASR.
 `workers/title_cards.cjs CARDS.json FONT.woff2 OUTPUT_DIR` creates typographic
 1280×720 chapter PNGs with Playwright. The font must include the chosen text's
 characters. `configs/film-cards.example.json` contains the four showcase cards;
-`configs/film.example.json` defines their complete sequence. Each card has `file`, `title`, `subtitle`, `number` (`00`–`03`),
+`configs/film.example.json` defines their complete sequence. Each card has `file`, `title`, `subtitle`, `number` (`00`–`04`),
 `count` (2 or 3), and a CSS `accent` color. No external assets are fetched.
 
 `workers/edit_film.py` composes cards and compatible 24 fps 1280×720 clips. A
@@ -233,15 +233,20 @@ sbatch workers/render.sbatch --recording runs/showcase-3 \
   --title 'Three-way conversation' --subtitle 'Two PersonaPlex agents + Moshi'
 node workers/title_cards.cjs configs/film-cards.example.json \
   work/film-font.woff2 output/film-cards-mudusi-pastel
-# Run only after the three rendering jobs finish successfully:
+# Run after the three clips and the nine-room export finish successfully
+# (see MATRIX.md for output/mudusi-nine-rooms.mp4):
 sbatch workers/edit_film.sbatch --manifest configs/film.example.json \
   --output output/mudusi-introduction.mp4
 ```
 
 The selected recordings are private runtime artifacts and are not bundled with the
 repository. Use your own completed recordings or the published project-page clips.
-The introduction retains the order title → friends → clerk/customer → three agents,
+The introduction now follows title → friends → clerk/customer → three agents → nine rooms,
 with silent transition padding so the crossfades do not overlap adjacent speech.
+The final chapter uses the complete 54-second nine-room export, preceded by an
+English chapter card. The film exports at 1920 × 1080 to retain the grid captions;
+the nine-room segment keeps its 0.25× collection / normal-speed replay label.
+The model audio and offline ASR are unchanged. [Watch the full introduction](https://kyudan1.github.io/MuDuSi/assets/introduction.mp4).
 
 
 The October 12, 2026 pastel exports used CPU rendering jobs 189971–189973 and
@@ -250,3 +255,11 @@ full audio/video decoding. Each re-rendered clip had the same decoded audio
 sample count as its earlier English export, with zero-offset waveform correlation
 1.0. In the chaptered film, segment correlations exceeded 0.99997 at the expected
 start times. The changes affect presentation, not the model dialogue.
+
+The October 13, 2026 introduction adds the nine-room chapter (edit job 190737,
+web packaging job 190739): 132.58 seconds, 3,182 frames at 24 fps, 1920 × 1080.
+All video frames and audio decoded successfully. Each of the four dialogue
+segments was checked against its source audio at the expected timeline offset
+(correlation greater than 0.98); cards and transition padding remain silent.
+[Published provenance](https://kyudan1.github.io/MuDuSi/assets/introduction.json)
+records the chapter timings and exact correlations.
